@@ -5,12 +5,35 @@
 #include <string>
 #include <vector>
 
+#include "dns.h"
+#include "rr.h"
+
 namespace dns {
 
-typedef unsigned char uchar;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned char byte;
+class Buffer
+{
+private: 
+
+    // buffer content
+    const char* mBuffer;
+    // buffer content size
+    const uint mBufferSize;
+    // current position in buffer
+    const char* mBufferPtr;
+
+public:
+
+    Buffer(const char* buffer, uint bufferSize) : mBuffer(buffer), mBufferSize(bufferSize), mBufferPtr(buffer) { }
+
+    uchar get8bits();
+    uint get16bits();
+    uint get32bits();
+    const char* getBytes(uint count);
+    uint getPos() { return mBufferPtr - mBuffer; }
+    void setPos(const uint pos);
+    uint getSize() { return mBufferSize; }
+};
+
 
 /* Class for a DNSQuery */
 class QuerySection
@@ -38,6 +61,8 @@ public:
     /* Get the class of the query */
     uint getClass() const;
 
+    std::string asString();
+
 protected:
 
     /* Name of the query */
@@ -48,15 +73,6 @@ protected:
 
     /* Class of the query */
     uint mQClass;
-};
-
-class ResourceRecord
-{
-    int a;
-
-    /* Constructor */
-    ResourceRecord() { a = 3; };
-
 };
 
 /**
@@ -97,9 +113,17 @@ public:
      *  Returns the DNS message header as a string text.
      *  @return The string text with the header information.
      */
-    std::string asString() const throw();
+    std::string asString();
+
+    /**
+     *  Function that logs the whole buffer of a DNS Message
+     *  @param buffer The buffer to be logged.
+     *  @param size The size of the buffer.
+     */
+    void log_buffer(const char* buffer, int size) throw();
 
 protected:
+
     static const uint HDR_OFFSET = 12;
 
     uint m_id;
@@ -117,7 +141,8 @@ protected:
      */
     void encodeHeader(char* buffer) throw ();
 
-    std::string decodeDomain(const char* buffer, int bufferSize, uint start, uint& size) throw();
+    std::string decodeDomain(Buffer &buffer) throw();
+    void decodeResourceRecords(Buffer &buffer, uint count, std::vector<ResourceRecord*> &list);
 
     /**
      *  Helper function that get 16 bits from the buffer and keeps it an int.
@@ -143,12 +168,6 @@ protected:
      */
     void put32bits(char*& buffer, ulong value) throw ();
 
-    /**
-     *  Function that logs the whole buffer of a DNS Message
-     *  @param buffer The buffer to be logged.
-     *  @param size The size of the buffer.
-     */
-    void log_buffer(const char* buffer, int size) throw();
     
 private:
     static const uint QR_MASK = 0x8000;
@@ -160,9 +179,9 @@ private:
     static const uint RCODE_MASK = 0x000F;
 
     std::vector<QuerySection*> mQueries;
-    std::vector<ResourceRecord> mAnswers;
-    std::vector<ResourceRecord> mAuthorities;
-    std::vector<ResourceRecord> mAdditional;
+    std::vector<ResourceRecord*> mAnswers;
+    std::vector<ResourceRecord*> mAuthorities;
+    std::vector<ResourceRecord*> mAdditional;
 };
 } // namespace
 #endif	/* _DNS_MESSAGE_H */
