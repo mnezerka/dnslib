@@ -18,99 +18,10 @@
 using namespace dns;
 using namespace std;
 
-uchar Buffer::get8bits()
-{
-    // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 1 > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
-        
-    uchar value = static_cast<uchar> (mBufferPtr[0]);
-    mBufferPtr += 1;
-
-    return value;
-}
-
-uint Buffer::get16bits()
-{
-    // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 2 > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
-        
-    uint value = static_cast<uchar> (mBufferPtr[0]);
-    value = value << 8;
-    value += static_cast<uchar> (mBufferPtr[1]);
-    mBufferPtr += 2;
-
-    return value;
-}
-
-uint Buffer::get32bits()
-{
-    // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 4 > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
-
-    uint value = 0;
-    value += (static_cast<uchar> (mBufferPtr[0])) << 24;
-    value += (static_cast<uchar> (mBufferPtr[1])) << 16;
-    value += (static_cast<uchar> (mBufferPtr[2])) << 8;
-    value += static_cast<uchar> (mBufferPtr[3]);
-    mBufferPtr += 4;
-
-    return value;
-}
-
-void Buffer::setPos(const uint pos)
-{
-    // check if we are inside buffer
-    if (pos >= mBufferSize)
-        throw(Exception("Try to set pos behind buffer"));
-    mBufferPtr = mBuffer + pos; 
-}
-
-const char* Buffer::getBytes(uint count) 
-{
-    // check if we are inside buffer
-    if (mBufferPtr - mBuffer + count > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
-
-    const char *result = mBufferPtr;    
-    mBufferPtr += count;
-
-    return result;
-}
-
-
-void ResourceRecord::setRData(const char * rData, uint rDataSize)
-{
-    if (rDataSize > 2048)    
-        throw(Exception("RData have size > 2048 bytes"));
-
-    // free memory
-    if (mRData)
-        delete[] mRData;
-
-    // allocate new memory
-    mRData = new char[rDataSize];
-
-    // copy rdata
-    std::memcpy(mRData, rData, rDataSize);
-
-    // set new size
-    mRDataSize = rDataSize;
-}
-
 std::string QuerySection::asString()
 {
     ostringstream text;
     text << "<DNS Question: " << mQName << " qtype=" << mQType << " qclass=" << mQClass << endl;
-    return text.str();
-}
-
-std::string ResourceRecord::asString()
-{
-    ostringstream text;
-    text << "<DNS RR: "  << mName << " rtype=" << mType << " rclass=" << mClass << " ttl=" << mTtl << " rdata=" <<  mRDataSize << " bytes" << endl;
     return text.str();
 }
 

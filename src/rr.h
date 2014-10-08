@@ -11,6 +11,22 @@
 
 namespace dns {
 
+class RecordNAPTR {
+
+public:    
+
+    RecordNAPTR() : mOrder(0), mPreference(0), mFlags(""), mServices(""), mRegExp(""), mReplacement("") { };
+    void decode(const char* buffer, int bufferSize);
+
+private:
+
+    uint mOrder;
+    uint  mPreference;
+    std::string mFlags;
+    std::string mServices;
+    std::string mRegExp;
+    std::string mReplacement;
+};
 
 class ResourceRecord
 {
