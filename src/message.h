@@ -7,49 +7,10 @@
 
 #include "dns.h"
 #include "rr.h"
+#include "qs.h"
 #include "buffer.h"
 
 namespace dns {
-
-/* Class for a DNSQuery */
-class QuerySection
-{
-public:
-
-    /* Constructor */
-    QuerySection(const std::string& qName = "") : mQName(qName), mQType(0), mQClass(0) { };
-
-    /* Set type of the query */
-    void setType(uint qType) { mQType = qType; };
-
-    /* Set type class of the query */
-    void setClass(uint qClass) { mQClass = qClass; };
-
-    /* Set name field from a string */
-    void setName(const std::string& qName) { mQName = qName; } ;
-
-    /* Get name filed of the query */
-    std::string getName() const;
-
-    /* Get the type of the query */
-    uint getType() const;
-
-    /* Get the class of the query */
-    uint getClass() const;
-
-    std::string asString();
-
-protected:
-
-    /* Name of the query */
-    std::string mQName;
-
-    /* Type field */
-    uint mQType;
-
-    /* Class of the query */
-    uint mQClass;
-};
 
 /**
  *  Class that represents the DNS Message and is able to code itself
@@ -62,20 +23,12 @@ public:
 
     // Constructor.
     Message() : m_qr(Query) { }
+ 
+    // Decode the message
+    void decode(const char* buffer, int size);
 
-    /**
-     *  Code the message
-     *  @param buffer The buffer to code the message into.
-     *  @return The size of the buffer coded
-     */
-    int code(char* buffer) throw();
-
-    /**
-     *  decode the message
-     *  @param buffer The buffer to decode the message into.
-     *  @param size The size of the buffer to decode
-     */
-    void decode(const char* buffer, int size) throw();
+    // Encode the message
+    void encode(char* buffer, int size);
 
     uint getID() const throw() { return m_id; }
     uint getQdCount() const throw() { return mQueries.size(); }
@@ -83,19 +36,12 @@ public:
     uint getNsCount() const throw() { return mAuthorities.size(); }
     uint getArCount() const throw() { return mAdditional.size(); }
 
-    void setID(uint id) throw() { m_id = id; }
+    void setID(uint id) { m_id = id; }
 
-     /**
-     *  Returns the DNS message header as a string text.
-     *  @return The string text with the header information.
-     */
+    // Returns the DNS message header as a string text.
     std::string asString();
 
-    /**
-     *  Function that logs the whole buffer of a DNS Message
-     *  @param buffer The buffer to be logged.
-     *  @param size The size of the buffer.
-     */
+    // Function that logs the whole buffer of a DNS Message
     void log_buffer(const char* buffer, int size) throw();
 
 protected:
@@ -117,34 +63,9 @@ protected:
      */
     void encodeHeader(char* buffer) throw ();
 
-    std::string decodeDomain(Buffer &buffer) throw();
     void decodeResourceRecords(Buffer &buffer, uint count, std::vector<ResourceRecord*> &list);
 
-    /**
-     *  Helper function that get 16 bits from the buffer and keeps it an int.
-     *  It helps in compatibility issues as ntohs()
-     *  @param buffer The buffer to get the 16 bits from.
-     *  @return An int holding the value extracted.
-     */
-    int get16bits(const char*& buffer) throw();
-
-    /**
-     *  Helper function that puts 16 bits into the buffer.
-     *  It helps in compatibility issues as htons()
-     *  @param buffer The buffer to put the 16 bits into.
-     *  @param value An unsigned int holding the value to set the buffer.
-     */
-    void put16bits(char*& buffer, uint value) throw ();
-
-    /**
-     *  Helper function that puts 32 bits into the buffer.
-     *  It helps in compatibility issues as htonl()
-     *  @param buffer The buffer to put the 32 bits into.
-     *  @param value An unsigned long holding the value to set the buffer.
-     */
-    void put32bits(char*& buffer, ulong value) throw ();
-
-    
+      
 private:
     static const uint QR_MASK = 0x8000;
     static const uint OPCODE_MASK = 0x7800;

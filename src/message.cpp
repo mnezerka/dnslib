@@ -18,20 +18,13 @@
 using namespace dns;
 using namespace std;
 
-std::string QuerySection::asString()
-{
-    ostringstream text;
-    text << "<DNS Question: " << mQName << " qtype=" << mQType << " qclass=" << mQClass << endl;
-    return text.str();
-}
-
-void Message::decode(const char* buffer, int bufferSize) throw()
+void Message::decode(const char* buffer, int bufferSize)
 {
     Logger& logger = Logger::instance();
     logger.trace("Message::decode()");
     log_buffer(buffer, bufferSize);
 
-    Buffer buff(buffer, bufferSize);   
+    Buffer buff(const_cast<char*>(buffer), bufferSize);   
 
     // 1. read header
     m_id = buff.get16bits();
@@ -52,7 +45,7 @@ void Message::decode(const char* buffer, int bufferSize) throw()
     {
         logger.trace("Message::decoding Query Section");
 
-        std::string qName = decodeDomain(buff);
+        std::string qName = buff.getDnsDomainName();
         uint qType = buff.get16bits();
         uint qClass = buff.get16bits();
 
@@ -71,81 +64,41 @@ void Message::decode(const char* buffer, int bufferSize) throw()
     Message::decodeResourceRecords(buff, arCount, mAdditional);
 }
 
-std::string Message::decodeDomain(Buffer &buffer) throw()
-{
-    std::string domain;
-
-    while (true)
-    {
-        uchar ctrlCode = buffer.get8bits();
-        if (ctrlCode == 0)
-        {
-            break;
-        }
-        else if (ctrlCode >> 6 == 3)
-        {
-            // read second byte
-            uchar ctrlCode2 = buffer.get8bits();
-            uint linkAddr = ((ctrlCode & 63) << 8) + ctrlCode2;
-            // change buffer position
-            uint saveBuffPos = buffer.getPos();
-            buffer.setPos(linkAddr);
-            std::string linkDomain = decodeDomain(buffer);
-            buffer.setPos(saveBuffPos);
-            if (domain.size() > 0)
-                domain.append(".");
-            domain.append(linkDomain);
-            // link always terminates the domain name (no zero at the end in this case) 
-            break;
-        }
-        else
-        {
-            if (domain.size() > 0)
-                domain.append(".");
-            domain.append(buffer.getBytes(ctrlCode), ctrlCode); // read label
-        }
-    }
-
-    return domain;
-}
-
 void Message::decodeResourceRecords(Buffer &buffer, uint count, std::vector<ResourceRecord*> &list)
 {
     for (int i = 0; i < count; i++)
     {
-        std::string rrName = decodeDomain(buffer);
-        uint rrType = buffer.get16bits();
-        uint rrClass = buffer.get16bits();
-        uint rrTtl = buffer.get32bits();
-        uint rrRLength = buffer.get16bits();
-
-        ResourceRecord *rr = new ResourceRecord(rrName);
-        rr->setType(rrType);
-        rr->setClass(rrClass);
-        rr->setTtl(rrTtl);
-        if (rrRLength > 0) {
-            rr->setRData(buffer.getBytes(rrRLength), rrRLength);
-        }
+        ResourceRecord *rr = new ResourceRecord();
+        rr->decode(buffer);
         list.push_back(rr);
     }
 }
 
-void Message::encodeHeader(char* buffer) throw ()
+void Message::encode(char* buffer, int bufferSize)
 {
-    /*
-    put16bits(buffer, m_id);
+    Buffer buff(buffer, bufferSize);
 
-    int fields = (m_qr << 15);
-    fields += (m_opcode << 14);
-    //...
-    fields += m_rcode;
-    put16bits(buffer, fields);
+    // encode header 
 
-    put16bits(buffer, mQueries.size());
-    put16bits(buffer, mAnswers.size());
-    put16bits(buffer, mAuthorities.size());
-    put16bits(buffer, mAdditional.size());
-    */
+    buff.put16bits(m_id);
+    uint fields = ((m_qr & 1) << 15);
+    fields += ((m_opcode & 15) << 11);
+    fields += ((m_aa & 1) << 10);
+    fields += ((m_tc & 1) << 9);
+    fields += ((m_rd & 1) << 8);
+    fields += ((m_ra & 1) << 7);
+    fields += ((m_rcode & 15));
+    buff.put16bits(fields);
+    buff.put16bits(mQueries.size());
+    buff.put16bits(mAnswers.size());
+    buff.put16bits(mAuthorities.size());
+    buff.put16bits(mAdditional.size());
+
+    // encode queries
+    for(std::vector<QuerySection*>::iterator it = mQueries.begin(); it != mQueries.end(); ++it)
+        (*it)->encode(buff);
+
+    buff.dump();
 }
 
 void Message::log_buffer(const char* buffer, int size) throw ()
