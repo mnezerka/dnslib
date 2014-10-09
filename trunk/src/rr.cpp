@@ -53,7 +53,7 @@ std::string RDataNAPTR::asString()
 
 void ResourceRecord::decode(Buffer &buffer)
 {
-    std::string rrName = buffer.getDnsDomainName();
+    mName = buffer.getDnsDomainName();
     mType = buffer.get16bits();
     mClass = buffer.get16bits();
     mTtl = buffer.get32bits();
@@ -68,6 +68,17 @@ void ResourceRecord::decode(Buffer &buffer)
             mRData->decode(buffer);
             //rr->setRData(buffer.getBytes(rrRLength), rrRLength);
     }
+}
+
+void ResourceRecord::encode(Buffer &buffer)
+{
+    buffer.putDnsDomainName(mName);
+    buffer.put16bits(mType);
+    buffer.put16bits(mClass);
+    buffer.put32bits(mTtl);
+    /*
+    mRDataSize = buffer.get16bits();
+    */
 }
 
 std::string ResourceRecord::asString()

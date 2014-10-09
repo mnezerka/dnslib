@@ -98,6 +98,9 @@ void Message::encode(char* buffer, int bufferSize)
     for(std::vector<QuerySection*>::iterator it = mQueries.begin(); it != mQueries.end(); ++it)
         (*it)->encode(buff);
 
+    for(std::vector<ResourceRecord*>::iterator it = mAnswers.begin(); it != mAnswers.end(); ++it)
+        (*it)->encode(buff);
+
     buff.dump();
 }
 

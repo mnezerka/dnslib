@@ -123,6 +123,8 @@ public:
 
     void decode(Buffer &buffer);
 
+    void encode(Buffer &buffer);
+
     std::string asString();
 
 private:

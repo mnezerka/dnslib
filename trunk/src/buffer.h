@@ -51,6 +51,7 @@ public:
 
     // Helper function that get 32 bits from the buffer and keeps it an int.
     uint get32bits();
+    void put32bits(const uint value);
 
     // Helper function that gets number of bytes from the buffer
     char* getBytes(uint count);
