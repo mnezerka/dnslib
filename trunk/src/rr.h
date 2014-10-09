@@ -8,15 +8,41 @@
 #include <vector>
 
 #include "dns.h"
+#include "buffer.h"
 
 namespace dns {
 
-class RecordNAPTR {
+class RData {
+public:
+    virtual void decode(Buffer &buffer) = 0;
+    virtual std::string asString() = 0;
+
+};
+
+class RDataRaw : public RData {
+
+public:
+    RDataRaw(uint dataSize) : mDataSize(dataSize), mData(NULL) { };
+    ~RDataRaw()  { if (mData) delete[] mData; };
+
+    virtual void decode(Buffer &buffer);
+    virtual std::string asString();
+
+private:
+    // raw data
+    uint mDataSize;
+    char* mData;
+
+};
+
+
+class RDataNAPTR : public RData {
 
 public:    
 
-    RecordNAPTR() : mOrder(0), mPreference(0), mFlags(""), mServices(""), mRegExp(""), mReplacement("") { };
-    void decode(const char* buffer, int bufferSize);
+    RDataNAPTR() : mOrder(0), mPreference(0), mFlags(""), mServices(""), mRegExp(""), mReplacement("") { };
+    void decode(Buffer &buffer);
+    virtual std::string asString();
 
 private:
 
@@ -77,7 +103,10 @@ class ResourceRecord
 public:
 
     /* Constructor */
-    ResourceRecord(const std::string& rrName = "") : mName(rrName), mType (0), mClass(0), mTtl(0), mRDataSize(0), mRData(NULL) { };
+    ResourceRecord() : mName(""), mType (0), mClass(0), mTtl(0), mRDataSize(0), mRData(NULL) { };
+
+    void setName(std::string newName) { mName = newName; };
+    uint getName() const;
 
     void setType(uint type) { mType = type; };
     uint getType() const;
@@ -91,6 +120,8 @@ public:
     void setRData(const char * rData, uint rDataSize);
     uint getRDataSize() const;
     const char* getRData() const;
+
+    void decode(Buffer &buffer);
 
     std::string asString();
 
@@ -112,7 +143,7 @@ private:
     uint mRDataSize;
 
     /* rdata */
-    char* mRData;
+    RData *mRData;
 
 };
 

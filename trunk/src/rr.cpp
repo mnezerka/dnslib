@@ -15,44 +15,69 @@
 using namespace dns;
 using namespace std;
 
-void RecordNAPTR::decode(const char* buffer, int bufferSize)
+void RDataRaw::decode(Buffer &buffer)
 {
-    Buffer buff(buffer, bufferSize);   
-
-    mOrder = buff.get16bits();
-    mPreference = buff.get16bits();
-    mFlags = buff.getDnsCharacterString();
-    mServices = buff.getDnsCharacterString();
-    mRegExp = buff.getDnsCharacterString();
-    mReplacement = buff.getDnsDomainName(); 
-}
-
-void ResourceRecord::setRData(const char * rData, uint rDataSize)
-{
-    if (rDataSize > 2048)    
-        throw(Exception("RData have size > 2048 bytes"));
-
-    // free memory
-    if (mRData)
-        delete[] mRData;
-
+    // get data from buffer
+    const char *data = buffer.getBytes(mDataSize);
+ 
     // allocate new memory
-    mRData = new char[rDataSize];
+    mData = new char[mDataSize];
 
     // copy rdata
-    std::memcpy(mRData, rData, rDataSize);
+    std::memcpy(mData, data, mDataSize);
+}
 
-    // set new size
-    mRDataSize = rDataSize;
+std::string RDataRaw::asString()
+{
+    ostringstream text;
+    text << "<<RData Raw size=" << mDataSize;
+    return text.str();
+}
+
+void RDataNAPTR::decode(Buffer &buffer)
+{
+    mOrder = buffer.get16bits();
+    mPreference = buffer.get16bits();
+    mFlags = buffer.getDnsCharacterString();
+    mServices = buffer.getDnsCharacterString();
+    mRegExp = buffer.getDnsCharacterString();
+    mReplacement = buffer.getDnsDomainName(); 
+}
+
+std::string RDataNAPTR::asString()
+{
+    ostringstream text;
+    text << "<<NAPTR order=" << mOrder << " preference=" << mPreference << " flags=" << mFlags << " services=" << mServices << " regexp=" << mRegExp << " replacement=" << mReplacement;
+    return text.str();
+}
+
+void ResourceRecord::decode(Buffer &buffer)
+{
+    std::string rrName = buffer.getDnsDomainName();
+    mType = buffer.get16bits();
+    mClass = buffer.get16bits();
+    mTtl = buffer.get32bits();
+    mRDataSize = buffer.get16bits();
+    switch (mType) {
+        case typeNAPTR:
+            mRData = new RDataNAPTR();
+            mRData->decode(buffer);
+            break;
+        default:
+            mRData = new RDataRaw(mRDataSize);
+            mRData->decode(buffer);
+            //rr->setRData(buffer.getBytes(rrRLength), rrRLength);
+    }
 }
 
 std::string ResourceRecord::asString()
 {
     ostringstream text;
-    text << "<DNS RR: "  << mName << " rtype=" << mType << " rclass=" << mClass << " ttl=" << mTtl << " rdata=" <<  mRDataSize << " bytes" << endl;
+    text << "<DNS RR: "  << mName << " rtype=" << mType << " rclass=" << mClass << " ttl=" << mTtl << " rdata=" <<  mRDataSize << " bytes ";
+    if (mRData)
+        text << mRData->asString();
+    text << endl;
     return text.str();
 }
-
-
 
 
