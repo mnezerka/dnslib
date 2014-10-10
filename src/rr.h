@@ -14,18 +14,19 @@ namespace dns {
 
 class RData {
 public:
+    virtual ~RData() { };
     virtual void decode(Buffer &buffer) = 0;
+    virtual void encode(Buffer &buffer) = 0;
     virtual std::string asString() = 0;
-
 };
 
 class RDataRaw : public RData {
 
 public:
     RDataRaw(uint dataSize) : mDataSize(dataSize), mData(NULL) { };
-    ~RDataRaw()  { if (mData) delete[] mData; };
-
+    virtual ~RDataRaw();
     virtual void decode(Buffer &buffer);
+    virtual void encode(Buffer &buffer);
     virtual std::string asString();
 
 private:
@@ -39,13 +40,21 @@ private:
 class RDataNAPTR : public RData {
 
 public:    
-
     RDataNAPTR() : mOrder(0), mPreference(0), mFlags(""), mServices(""), mRegExp(""), mReplacement("") { };
-    void decode(Buffer &buffer);
+    virtual ~RDataNAPTR() { };
+
+    void setOrder(uint newOrder) { mOrder = newOrder; };
+    void setPreference(uint newPreference) { mPreference = newPreference; };
+    void setFlags (std::string newFlags) { mFlags = newFlags; };
+    void setServices (std::string newServices) { mServices = newServices; };
+    void setRegExp (std::string newRegExp) { mRegExp = newRegExp; };
+    void setReplacement (std::string newReplacement) { mReplacement = newReplacement; };
+
+    virtual void decode(Buffer &buffer);
+    virtual void encode(Buffer &buffer);
     virtual std::string asString();
 
 private:
-
     uint mOrder;
     uint  mPreference;
     std::string mFlags;
@@ -56,6 +65,7 @@ private:
 
 class ResourceRecord
 {
+public:
     // a host address
     static const uint typeA = 1;
     // an authoritative name server
@@ -100,10 +110,9 @@ class ResourceRecord
     /* Typical class */
     static const uint  ClassIN = 1; 
 
-public:
-
     /* Constructor */
     ResourceRecord() : mName(""), mType (0), mClass(0), mTtl(0), mRDataSize(0), mRData(NULL) { };
+    ~ResourceRecord();
 
     void setName(std::string newName) { mName = newName; };
     uint getName() const;
@@ -117,9 +126,10 @@ public:
     void setTtl(uint newTtl) { mTtl = newTtl; };
     uint getTtl() const;
 
-    void setRData(const char * rData, uint rDataSize);
-    uint getRDataSize() const;
-    const char* getRData() const;
+    //void setRData(const char * rData, uint rDataSize);
+    void setRData(RData *newRData) { mRData = newRData; };
+    //uint getRDataSize() const;
+    //const char* getRData() const;
 
     void decode(Buffer &buffer);
 

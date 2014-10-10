@@ -12,9 +12,7 @@ using namespace std;
 uchar Buffer::get8bits()
 {
     // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 1 > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
-        
+    checkAvailableSpace(1);        
     uchar value = static_cast<uchar> (mBufferPtr[0]);
     mBufferPtr += 1;
 
@@ -24,9 +22,7 @@ uchar Buffer::get8bits()
 void Buffer::put8bits(const uchar value)
 {
     // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 1 > mBufferSize)
-        throw(Exception("Try to write behind buffer"));
-        
+    checkAvailableSpace(1);        
     *mBufferPtr = value & 0xFF;
     mBufferPtr++;
 }
@@ -34,9 +30,7 @@ void Buffer::put8bits(const uchar value)
 uint Buffer::get16bits()
 {
     // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 2 > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
-        
+    checkAvailableSpace(2);        
     uint value = static_cast<uchar> (mBufferPtr[0]);
     value = value << 8;
     value += static_cast<uchar> (mBufferPtr[1]);
@@ -48,9 +42,7 @@ uint Buffer::get16bits()
 void Buffer::put16bits(const uint value)
 {
     // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 2 > mBufferSize)
-        throw(Exception("Try to write behind buffer"));
-        
+    checkAvailableSpace(2);        
     *mBufferPtr = (value & 0xFF00) >> 8;
     mBufferPtr++;
     *mBufferPtr = value & 0xFF;
@@ -60,9 +52,7 @@ void Buffer::put16bits(const uint value)
 uint Buffer::get32bits()
 {
     // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 4 > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
-
+    checkAvailableSpace(4);
     uint value = 0;
     value += (static_cast<uchar> (mBufferPtr[0])) << 24;
     value += (static_cast<uchar> (mBufferPtr[1])) << 16;
@@ -76,9 +66,7 @@ uint Buffer::get32bits()
 void Buffer::put32bits(const uint value)
 {
     // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 4 > mBufferSize)
-        throw(Exception("Try to write behind buffer"));
-
+    checkAvailableSpace(4);
     *mBufferPtr = (value & 0xFF000000) >> 24;
     mBufferPtr++;
     *mBufferPtr = (value & 0x00FF0000) >> 16;
@@ -97,24 +85,22 @@ void Buffer::setPos(const uint pos)
     mBufferPtr = mBuffer + pos; 
 }
 
-char* Buffer::getBytes(uint count) 
+char* Buffer::getBytes(const uint count) 
 {
-    // check if we are inside buffer
-    if (mBufferPtr - mBuffer + count > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
-
+    checkAvailableSpace(count);
     char *result = mBufferPtr;    
     mBufferPtr += count;
 
     return result;
 }
 
-void Buffer::putBytes(const char* data, uint count) 
+void Buffer::putBytes(const char* data, const uint count) 
 {
-    // check if we are inside buffer
-    if (mBufferPtr - mBuffer + count > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
+    if (count == 0)
+        return;
 
+    // check if we are inside buffer
+    checkAvailableSpace(count);
     memcpy(mBufferPtr, data, sizeof(char) * count);
     mBufferPtr += count;
 }
@@ -122,23 +108,19 @@ void Buffer::putBytes(const char* data, uint count)
 std::string Buffer::getDnsCharacterString()
 {
     std::string result("");
-
-    // check if we are inside buffer
-    if (mBufferPtr - mBuffer + 1 > mBufferSize)
-        throw(Exception("Try to read behind buffer"));
  
     // read first octet (byte) to know length of string
     uint stringLen = get8bits();
     if (stringLen > 0)
-    {
-        // check if we are inside buffer
-        if (mBufferPtr - mBuffer + stringLen > mBufferSize)
-            throw(Exception("Try to read behind buffer"));
-     
         result.append(getBytes(stringLen), stringLen); // read label
-    }
 
     return result;
+}
+
+void Buffer::putDnsCharacterString(const std::string value)
+{
+    put8bits(value.length());
+    putBytes(value.c_str(), value.length());
 }
 
 std::string Buffer::getDnsDomainName()
@@ -182,9 +164,7 @@ std::string Buffer::getDnsDomainName()
 void Buffer::putDnsDomainName(const std::string value)
 {
     char domain[MAX_LABEL_LEN + 1]; // one additional byte for teminating zero byte
-    char compressionTips[MAX_LABEL_LEN + 1]; // one additional byte for teminating zero byte
-
-    cout << "PUT DNS DOMAIN NAME " << value << endl;
+    uint domainLabelIndexes[MAX_LABEL_LEN + 1]; // one additional byte for teminating zero byte
 
     if (value.length() > MAX_DOMAIN_LEN)
         throw(Exception("domain name too long to be stored in dns message (limit is 63 characters)"));
@@ -197,18 +177,18 @@ void Buffer::putDnsDomainName(const std::string value)
     }
 
     // convert value to <domain> without links as defined in RFC
-    // ims.cz -> |3|i|m|s|2|c|z|0|
+    // blue.ims.cz -> |4|b|l|u|e|3|i|m|s|2|c|z|0|
     uint labelLen = 0;
     uint labelLenPos = 0;
     uint domainPos = 1;
     uint ix = 0;
-    uint compressionTipsCount = 0;
+    uint domainLabelIndexesCount = 0;
     while (true) 
     {    
         if (value[ix] == '.' || ix == value.length())
         {
             domain[labelLenPos] = labelLen; 
-            compressionTips[compressionTipsCount++] = labelLenPos; 
+            domainLabelIndexes[domainLabelIndexesCount++] = labelLenPos; 
             // finish at the end of the string value 
             if (ix == value.length())
             {
@@ -231,64 +211,57 @@ void Buffer::putDnsDomainName(const std::string value)
     }
 
     // look for domain name parts in buffer and look for fragments for compression
-    // loop over all compression tips
-    for (int i = 0; i < compressionTipsCount; i++)
+    // loop over all domain labels 
+    bool compressionTipFound = false;
+    uint compressionTipPos = 0;
+    for (uint i = 0; i < domainLabelIndexesCount; i++)
     {
-        uint compressionTipPos = (uint)compressionTips[i];
-        char *compressionTip = domain + compressionTipPos;
-        uint compressionTipLen = domainPos - compressionTipPos;
-        bool compressionTipFound = true;
-
-        cout << "searching buffer for compression tip of length " << compressionTipLen << " which starts at " << compressionTipPos << " in domain" << endl;
+        // position of current label in domain buffer
+        uint domainLabelPos = (uint)domainLabelIndexes[i];
+        // pointer to subdomain (including initial byte for first label length) 
+        char* subDomain = domain + domainLabelPos;
+        // length of subdomain (e.g. |3|i|m|s|2|c|z|0| for blue.ims.cz)
+        uint subDomainLen = domainPos - domainLabelPos;
 
         // find buffer range that makes sense to search in
         uint buffLen = mBufferPtr - mBuffer;
-        if (buffLen > compressionTipLen)
-            buffLen -= compressionTipLen;
-        else
-            continue;
-
-        // go through buffer from beginning and try to find occurence of compression tip
-        for (int buffPos = 0; buffPos < buffLen ; buffPos++)
-        { 
-            // compare compression tip and content at current position in buffer
-            compressionTipFound = (memcmp(mBuffer + buffPos, compressionTip, compressionTipLen) == 0); 
-            cout << "found: " << compressionTipFound << " link value: " << buffPos << endl;
-            if (compressionTipFound)
-                break;
-
+        // if buffer is large enought for searching
+        if (buffLen > subDomainLen)
+        {
+            // modify buffer length
+            buffLen -= subDomainLen;
+            // go through buffer from beginning and try to find occurence of compression tip
+            for (uint buffPos = 0; buffPos < buffLen ; buffPos++)
+            { 
+                // compare compression tip and content at current position in buffer
+                compressionTipFound = (memcmp(mBuffer + buffPos, subDomain, subDomainLen) == 0); 
+                if (compressionTipFound)
+                {
+                    compressionTipPos = buffPos;
+                    break;
+                }
+            }
         }
-
-        cout << "writing label of len " << labelLen << endl;
-        uint labelLen = domain[compressionTipPos];
-        putBytes(compressionTip, labelLen);
-
-        /*
+    
         if (compressionTipFound)
         {
-            // TODO - write link
-            //break;
-            //
-            // write label
-            uint labelLen = domain[compressionTipPos];
-            putBytes(compressionTip, labelLen);
-
+            // link starts with value bin(1100000000000000)
+            uint linkValue = 0xc000; 
+            linkValue += compressionTipPos;
+            put16bits(linkValue);
+            break;
         }
         else
         {
             // write label
-            uint labelLen = domain[compressionTipPos];
-            putBytes(compressionTip, labelLen);
+            uint labelLen = subDomain[0];
+            putBytes(subDomain, labelLen + 1);
         }
-        */
     }
-
-    cout << "domain name " << value << " -> writing " << domainPos << " bytes to buffer" << " compression tips: " << compressionTipsCount << endl;
-
-    //putBytes(domain, domainPos);
+    // write terminating zero if no compression tip was found and all labels are writtten to buffer
+    if (!compressionTipFound)
+        put8bits(0);
 }
-
-
 
 void Buffer::dump()
 {
@@ -306,4 +279,19 @@ void Buffer::dump()
     cout << endl << setfill(' ');
     cout << "---------------------------------" << endl;
 }
+
+void Buffer::checkAvailableSpace(const uint additionalSpace)
+{
+    // check if buffer pointer is valid 
+    if (mBufferPtr < mBuffer)
+        throw(Exception("Buffer pointer is invalid"));
+
+    // get position in buffer 
+    uint bufferPos = (mBufferPtr - mBuffer);
+
+    // check if we are inside buffer
+    if ((bufferPos + additionalSpace) > mBufferSize)
+        throw(Exception("Try to read behind buffer"));
+}
+
 
