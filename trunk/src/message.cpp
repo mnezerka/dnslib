@@ -11,19 +11,33 @@
 #include <iomanip>
 #include <netinet/in.h>
 
-#include "logger.h"
 #include "message.h"
 #include "exception.h"
 
 using namespace dns;
 using namespace std;
 
+Message::~Message()
+{
+    // delete all queries
+    for(std::vector<QuerySection*>::iterator it = mQueries.begin(); it != mQueries.end(); ++it)
+        delete(*it);
+    
+    // delete answers 
+    for(std::vector<ResourceRecord*>::iterator it = mAnswers.begin(); it != mAnswers.end(); ++it)
+        delete(*it);
+
+    // delete authorities
+    for(std::vector<ResourceRecord*>::iterator it = mAuthorities.begin(); it != mAuthorities.end(); ++it)
+        delete(*it);
+
+    // delete additional 
+    for(std::vector<ResourceRecord*>::iterator it = mAdditional.begin(); it != mAdditional.end(); ++it)
+        delete(*it);
+}
+
 void Message::decode(const char* buffer, int bufferSize)
 {
-    Logger& logger = Logger::instance();
-    logger.trace("Message::decode()");
-    log_buffer(buffer, bufferSize);
-
     Buffer buff(const_cast<char*>(buffer), bufferSize);   
 
     // 1. read header
@@ -41,10 +55,8 @@ void Message::decode(const char* buffer, int bufferSize)
     uint arCount = buff.get16bits();
 
     // 2. read Question Sections
-    for (int i = 0; i < qdCount; i++)
+    for (uint i = 0; i < qdCount; i++)
     {
-        logger.trace("Message::decoding Query Section");
-
         std::string qName = buff.getDnsDomainName();
         uint qType = buff.get16bits();
         uint qClass = buff.get16bits();
@@ -56,17 +68,18 @@ void Message::decode(const char* buffer, int bufferSize)
     }
 
     // 3. read Answer Resource Records
-    logger.trace("Message::decoding Answers");
     Message::decodeResourceRecords(buff, anCount, mAnswers);
-    logger.trace("Message::decoding Authorities");
     Message::decodeResourceRecords(buff, nsCount, mAuthorities);
-    logger.trace("Message::decoding Additional");
     Message::decodeResourceRecords(buff, arCount, mAdditional);
+
+    // 4. check that buffer is consumed
+    if (buff.getPos() != buff.getSize())
+        throw(Exception("Message buffer not empty after parsing"));
 }
 
 void Message::decodeResourceRecords(Buffer &buffer, uint count, std::vector<ResourceRecord*> &list)
 {
-    for (int i = 0; i < count; i++)
+    for (uint i = 0; i < count; i++)
     {
         ResourceRecord *rr = new ResourceRecord();
         rr->decode(buffer);
@@ -74,8 +87,9 @@ void Message::decodeResourceRecords(Buffer &buffer, uint count, std::vector<Reso
     }
 }
 
-void Message::encode(char* buffer, int bufferSize)
+void Message::encode(char* buffer, const uint bufferSize, uint &validSize)
 {
+    validSize = 0;
     Buffer buff(buffer, bufferSize);
 
     // encode header 
@@ -98,32 +112,19 @@ void Message::encode(char* buffer, int bufferSize)
     for(std::vector<QuerySection*>::iterator it = mQueries.begin(); it != mQueries.end(); ++it)
         (*it)->encode(buff);
 
+    // encode answers 
     for(std::vector<ResourceRecord*>::iterator it = mAnswers.begin(); it != mAnswers.end(); ++it)
         (*it)->encode(buff);
 
-    buff.dump();
-}
+    // encode authorities
+    for(std::vector<ResourceRecord*>::iterator it = mAuthorities.begin(); it != mAuthorities.end(); ++it)
+        (*it)->encode(buff);
 
-void Message::log_buffer(const char* buffer, int size) throw ()
-{
-    ostringstream text;
+    // encode additional 
+    for(std::vector<ResourceRecord*>::iterator it = mAdditional.begin(); it != mAdditional.end(); ++it)
+        (*it)->encode(buff);
 
-    text << "Message::log_buffer()" << endl;
-    text << "size: " << size << " bytes" << endl;
-    text << "---------------------------------" << setfill('0');
-
-    for (int i = 0; i < size; i++) {
-        if ((i % 10) == 0) {
-            text << endl << setw(2) << i << ": ";
-        }
-        uchar c = buffer[i];
-        text << hex << setw(2) << int(c) << " " << dec;
-    }
-    text << endl << setfill(' ');
-    text << "---------------------------------";
-
-    Logger& logger = Logger::instance();
-    logger.trace(text);
+    validSize = buff.getPos();
 }
 
 string Message::asString()

@@ -17,7 +17,6 @@ struct DomainItem {
 class Buffer
 {
 private: 
-
     // buffer content
     char* mBuffer;
     // buffer content size
@@ -29,7 +28,6 @@ private:
     std::vector<DomainItem*> mDomains;
 
 public:
-
     Buffer(char* buffer, uint bufferSize) : mBuffer(buffer), mBufferSize(bufferSize), mBufferPtr(buffer) { }
 
     // get current position in buffer
@@ -59,6 +57,7 @@ public:
 
     // Helper function that gets <character-string> (according to RFC 1035) from buffer
     std::string getDnsCharacterString();
+    void putDnsCharacterString(const std::string value);
 
     // Helper function that gets <domain> (according to RFC 1035) from buffer
     std::string getDnsDomainName();
@@ -66,6 +65,8 @@ public:
     // Helper function that puts <domain> (according to RFC 1035) to buffer
     void putDnsDomainName(const std::string value);
 
+    // Check if there is enough space in buffer  
+    void checkAvailableSpace(const uint additionalSpace);
 
     // Function that dumps the whole buffer
     void dump();
