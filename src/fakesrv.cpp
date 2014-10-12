@@ -35,17 +35,19 @@ int main(int argc, char** argv)
     {
         len = sizeof(cliaddr);
         n = recvfrom(sockfd, mesg, MAX_MSG, 0, (struct sockaddr *)&cliaddr, &len);
-        cout << "received " << n << "bytes" << endl; 
+        //cout << "received " << n << "bytes" << endl; 
         dns::Message m;
         m.decode(mesg, n);
 
+        /*
         cout << "-------------------------------------------------------" << endl;
         cout << "Received message:" << endl;
         cout << m.asString() << endl;
         cout << "-------------------------------------------------------" << endl;
+        */
 
         // change type of message to response
-        m.setQR(dns::Message::typeResponse);
+        m.setQr(dns::Message::typeResponse);
 
         // add NAPTR answer
         dns::ResourceRecord *rr = new dns::ResourceRecord();
@@ -62,15 +64,17 @@ int main(int argc, char** argv)
 
         m.addAnswer(rr);
 
+        /*
         cout << "-------------------------------------------------------" << endl;
         cout << "Sending message:" << endl;
         cout << m.asString() << endl;
         cout << "-------------------------------------------------------" << endl;
+        */
 
         uint mesgSize;
         m.encode(mesg, MAX_MSG, mesgSize);
 
-        cout << "sending " << mesgSize << " bytes" << endl;
+        //cout << "sending " << mesgSize << " bytes" << endl;
         sendto(sockfd, mesg, mesgSize, 0, (struct sockaddr *)&cliaddr,sizeof(cliaddr));
     }
     return 0;

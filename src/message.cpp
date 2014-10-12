@@ -36,19 +36,21 @@ Message::~Message()
         delete(*it);
 }
 
-void Message::decode(const char* buffer, int bufferSize)
+void Message::decode(const char* buffer, const uint bufferSize)
 {
+    if (bufferSize > MAX_MSG_LEN)
+        throw (Exception("Aborting parse of message which exceedes maximal DNS message length."));
     Buffer buff(const_cast<char*>(buffer), bufferSize);   
 
     // 1. read header
-    m_id = buff.get16bits();
+    mId = buff.get16bits();
     uint fields = buff.get16bits();
-    m_qr = fields & QR_MASK;
-    m_opcode = fields & OPCODE_MASK;
-    m_aa = fields & AA_MASK;
-    m_tc = fields & TC_MASK;
-    m_rd = fields & RD_MASK;
-    m_ra = fields & RA_MASK;
+    mQr = fields & QR_MASK;
+    mOpCode = fields & OPCODE_MASK;
+    mAA = fields & AA_MASK;
+    mTC = fields & TC_MASK;
+    mRD = fields & RD_MASK;
+    mRA = fields & RA_MASK;
     uint qdCount = buff.get16bits();
     uint anCount = buff.get16bits();
     uint nsCount = buff.get16bits();
@@ -94,14 +96,14 @@ void Message::encode(char* buffer, const uint bufferSize, uint &validSize)
 
     // encode header 
 
-    buff.put16bits(m_id);
-    uint fields = ((m_qr & 1) << 15);
-    fields += ((m_opcode & 15) << 11);
-    fields += ((m_aa & 1) << 10);
-    fields += ((m_tc & 1) << 9);
-    fields += ((m_rd & 1) << 8);
-    fields += ((m_ra & 1) << 7);
-    fields += ((m_rcode & 15));
+    buff.put16bits(mId);
+    uint fields = ((mQr & 1) << 15);
+    fields += ((mOpCode & 15) << 11);
+    fields += ((mAA & 1) << 10);
+    fields += ((mTC & 1) << 9);
+    fields += ((mRD & 1) << 8);
+    fields += ((mRA & 1) << 7);
+    fields += ((mRCode & 15));
     buff.put16bits(fields);
     buff.put16bits(mQueries.size());
     buff.put16bits(mAnswers.size());
@@ -131,8 +133,8 @@ string Message::asString()
 {
     ostringstream text;
     text << "Header:" << endl;
-    text << "ID: " << showbase << hex << m_id << endl << noshowbase;
-    text << "  fields: [ QR: " << m_qr << " opCode: " << m_opcode << " ]" << endl;
+    text << "ID: " << showbase << hex << mId << endl << noshowbase;
+    text << "  fields: [ QR: " << mQr << " opCode: " << mOpCode << " ]" << endl;
     text << "  QDcount: " << mQueries.size() << endl;
     text << "  ANcount: " << mAnswers.size() << endl;
     text << "  NScount: " << mAuthorities.size() << endl;

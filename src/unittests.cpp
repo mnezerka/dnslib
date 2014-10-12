@@ -76,7 +76,7 @@ void testMemoryAllocation()
 
     dns::Message answer;
     answer.decode(packet, sizeof(packet) - 1);
-    answer.setQR(dns::Message::typeResponse);
+    answer.setQr(dns::Message::typeResponse);
 
     // add NAPTR answer
     dns::ResourceRecord *rr = new dns::ResourceRecord();
