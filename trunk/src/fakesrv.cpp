@@ -31,6 +31,7 @@ int main(int argc, char** argv)
     bind(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
     cout << "socket binded (port " << listenPort << ")" << endl;
 
+    unsigned int i = 0;
     for (;;)
     {
         len = sizeof(cliaddr);
@@ -76,6 +77,10 @@ int main(int argc, char** argv)
 
         //cout << "sending " << mesgSize << " bytes" << endl;
         sendto(sockfd, mesg, mesgSize, 0, (struct sockaddr *)&cliaddr,sizeof(cliaddr));
+
+        if (i % 10000 == 0)
+            cout << "iterations: " << i << endl;
+        i++;
     }
     return 0;
 }

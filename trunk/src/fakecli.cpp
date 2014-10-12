@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     int sockfd = 0;
     
     struct sockaddr_in servaddr;
-    //char bufRecv[MAX_MSG];
+    char bufRecv[MAX_MSG];
     char bufSend[MAX_MSG];
 
     if (argc != 2)
@@ -45,7 +45,6 @@ int main(int argc, char** argv)
     qs->setClass(dns::ResourceRecord::ClassIN);
     m.addQuery(qs);
 
-
     sockfd = socket(AF_INET,SOCK_DGRAM, 0);
     bzero(&servaddr, sizeof(servaddr));
     servaddr.sin_family = AF_INET;
@@ -60,6 +59,10 @@ int main(int argc, char** argv)
         m.encode(bufSend, MAX_MSG, msgSize);
         //cout << "sending " << msgSize << " bytes" << endl;
         sendto(sockfd, bufSend, msgSize, 0, (struct sockaddr *)&servaddr,sizeof(servaddr));
+
+        //int n = recvfrom(sockfd, bufRecv, MAX_MSG, 0, NULL, NULL);
+        recvfrom(sockfd, bufRecv, MAX_MSG, 0, NULL, NULL);
+
         if (i % 10000 == 0)
             cout << "iterations: " << i << endl;
     }
