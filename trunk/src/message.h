@@ -22,7 +22,7 @@ class Message {
         static const uint typeResponse = 1;
 
         // Constructor.
-        Message() : m_qr(typeQuery), m_opcode(0), m_aa(0), m_tc(0), m_rd(0), m_ra(0), m_rcode(0) { } 
+        Message() : mQr(typeQuery), mOpCode(0), mAA(0), mTC(0), mRD(0), mRA(0), mRCode(0) { } 
 
         // Virtual desctructor
         ~Message();
@@ -30,7 +30,7 @@ class Message {
         // Decode DNS message from buffer
         // @param buffer The buffer to code the message header into.
         // @param size - size of buffer 
-        void decode(const char* buffer, int size);
+        void decode(const char* buffer, const uint size);
 
         // Function that codes the DNS message
         // @param buffer The buffer to code the message header into.
@@ -38,10 +38,10 @@ class Message {
         // @param validSize - number of bytes that contain encoded message
         void encode(char* buffer, const uint size, uint &validSize);
 
-        uint getID() const throw() { return m_id; }
-        void setID(uint id) { m_id = id; }
+        uint getId() const throw() { return mId; }
+        void setId(uint id) { mId = id; }
 
-        void setQR(uint newQR) { m_qr = newQR; } 
+        void setQr(uint newQr) { mQr = newQr; } 
 
         uint getQdCount() { return mQueries.size(); }
         uint getAnCount() { return mAnswers.size(); }
@@ -69,14 +69,14 @@ class Message {
 
         void decodeResourceRecords(Buffer &buffer, uint count, std::vector<ResourceRecord*> &list);
 
-        uint m_id;
-        uint m_qr;
-        uint m_opcode;
-        uint m_aa;
-        uint m_tc;
-        uint m_rd;
-        uint m_ra;
-        uint m_rcode;
+        uint mId;
+        uint mQr;
+        uint mOpCode;
+        uint mAA;
+        uint mTC;
+        uint mRD;
+        uint mRA;
+        uint mRCode;
 
         std::vector<QuerySection*> mQueries;
         std::vector<ResourceRecord*> mAnswers;

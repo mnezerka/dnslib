@@ -13,8 +13,9 @@ typedef unsigned long ulong;
 typedef unsigned char byte;
 
 // maximal length of domain label name
+const uint MAX_MSG_LEN = 512;
 const uint MAX_LABEL_LEN = 63;
-const uint MAX_DOMAIN_LEN = 63;
+const uint MAX_DOMAIN_LEN = 255;
 
 
 } // namespace
