@@ -16,7 +16,7 @@ const int listenPort = 6666;
 
 int main(int argc, char** argv)
 {
-    int sockfd,n;
+    int sockfd;
     
     struct sockaddr_in servaddr,cliaddr;
     socklen_t len;
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     for (;;)
     {
         len = sizeof(cliaddr);
-        n = recvfrom(sockfd, mesg, MAX_MSG, 0, (struct sockaddr *)&cliaddr, &len);
+        int n = recvfrom(sockfd, mesg, MAX_MSG, 0, (struct sockaddr *)&cliaddr, &len);
         //cout << "received " << n << "bytes" << endl; 
         dns::Message m;
         m.decode(mesg, n);

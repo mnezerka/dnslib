@@ -1,8 +1,22 @@
-/* 
- * File:   message.cpp
- * Author: tomas
+/**
+ * DNS Message
+ *
+ * Copyright (C) 2014 - Michal Nezerka <michal.nezerka@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  * 
- * Created on 29 de junio de 2009, 17:39
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
  */
 
 #include <iostream>
@@ -19,21 +33,30 @@ using namespace std;
 
 Message::~Message()
 {
+    removeAllRecords();
+}
+
+void Message::removeAllRecords()
+{
     // delete all queries
     for(std::vector<QuerySection*>::iterator it = mQueries.begin(); it != mQueries.end(); ++it)
         delete(*it);
-    
+    mQueries.clear();
+     
     // delete answers 
     for(std::vector<ResourceRecord*>::iterator it = mAnswers.begin(); it != mAnswers.end(); ++it)
         delete(*it);
+    mAnswers.clear();
 
     // delete authorities
     for(std::vector<ResourceRecord*>::iterator it = mAuthorities.begin(); it != mAuthorities.end(); ++it)
         delete(*it);
+    mAuthorities.clear();
 
     // delete additional 
     for(std::vector<ResourceRecord*>::iterator it = mAdditional.begin(); it != mAdditional.end(); ++it)
         delete(*it);
+    mAdditional.clear();
 }
 
 void Message::decode(const char* buffer, const uint bufferSize)
@@ -42,21 +65,24 @@ void Message::decode(const char* buffer, const uint bufferSize)
         throw (Exception("Aborting parse of message which exceedes maximal DNS message length."));
     Buffer buff(const_cast<char*>(buffer), bufferSize);   
 
-    // 1. read header
+    // 1. delete all items in lists of message records (queries, resource records)
+    removeAllRecords();
+
+    // 2. read header
     mId = buff.get16bits();
     uint fields = buff.get16bits();
-    mQr = fields & QR_MASK;
-    mOpCode = fields & OPCODE_MASK;
-    mAA = fields & AA_MASK;
-    mTC = fields & TC_MASK;
-    mRD = fields & RD_MASK;
-    mRA = fields & RA_MASK;
+    mQr = (fields >> 15) & 1;
+    mOpCode = (fields >> 11) & 15;
+    mAA = (fields >> 10) & 1;
+    mTC = (fields >> 9) & 1;
+    mRD = (fields >> 8) & 1;
+    mRA = (fields >> 7) & 1;
     uint qdCount = buff.get16bits();
     uint anCount = buff.get16bits();
     uint nsCount = buff.get16bits();
     uint arCount = buff.get16bits();
 
-    // 2. read Question Sections
+    // 3. read Question Sections
     for (uint i = 0; i < qdCount; i++)
     {
         std::string qName = buff.getDnsDomainName();
@@ -69,12 +95,12 @@ void Message::decode(const char* buffer, const uint bufferSize)
         mQueries.push_back(qs);
     }
 
-    // 3. read Answer Resource Records
+    // 4. read Answer Resource Records
     Message::decodeResourceRecords(buff, anCount, mAnswers);
     Message::decodeResourceRecords(buff, nsCount, mAuthorities);
     Message::decodeResourceRecords(buff, arCount, mAdditional);
 
-    // 4. check that buffer is consumed
+    // 5. check that buffer is consumed
     if (buff.getPos() != buff.getSize())
         throw(Exception("Message buffer not empty after parsing"));
 }

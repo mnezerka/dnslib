@@ -1,3 +1,24 @@
+/**
+ * DNS Buffer 
+ *
+ * Copyright (C) 2014 - Michal Nezerka <michal.nezerka@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ */
+
 #ifndef _DNS_BUFFER_H
 #define	_DNS_BUFFER_H
 
@@ -14,6 +35,17 @@ struct DomainItem {
     uint pos;
 };
 
+/**
+ * Buffer for DNS protocol parsing and serialization
+ *
+ * <domain-name> is a domain name represented as a series of labels, and
+ * terminated by a label with zero length.
+ *
+ * <character-string> is a single length octet followed by that number
+ * of characters.  <character-string> is treated as binary information,
+ * and can be up to 256 characters in length (including the length octet).
+ *
+ */
 class Buffer
 {
 private: 
@@ -57,13 +89,13 @@ public:
 
     // Helper function that gets <character-string> (according to RFC 1035) from buffer
     std::string getDnsCharacterString();
-    void putDnsCharacterString(const std::string value);
+    void putDnsCharacterString(const std::string& value);
 
     // Helper function that gets <domain> (according to RFC 1035) from buffer
     std::string getDnsDomainName();
 
     // Helper function that puts <domain> (according to RFC 1035) to buffer
-    void putDnsDomainName(const std::string value);
+    void putDnsDomainName(const std::string& value);
 
     // Check if there is enough space in buffer  
     void checkAvailableSpace(const uint additionalSpace);
