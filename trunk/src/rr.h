@@ -1,5 +1,23 @@
-
-// http://www.ietf.org/rfc/rfc2915.txt - NAPTR
+/**
+ * DNS Resource Record 
+ *
+ * Copyright (C) 2014 - Michal Nezerka <michal.nezerka@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
+ */
 
 #ifndef _DNS_RR_H
 #define	_DNS_RR_H
@@ -12,6 +30,7 @@
 
 namespace dns {
 
+/** Abstract class that act as base for all Resource Record RData types */
 class RData {
 public:
     virtual ~RData() { };
@@ -20,6 +39,10 @@ public:
     virtual std::string asString() = 0;
 };
 
+/** Generic RData field which stores raw RData bytes.
+ *
+ * This class is used for cases when RData type is not known or
+ * class for appropriate type is not implemented. */
 class RDataRaw : public RData {
 
 public:
@@ -36,6 +59,7 @@ private:
 
 };
 
+// http://www.ietf.org/rfc/rfc2915.txt - NAPTR
 
 class RDataNAPTR : public RData {
 
@@ -44,11 +68,17 @@ public:
     virtual ~RDataNAPTR() { };
 
     void setOrder(uint newOrder) { mOrder = newOrder; };
+    uint getOrder() { return mOrder; };
     void setPreference(uint newPreference) { mPreference = newPreference; };
+    uint getPreference() { return mPreference; };
     void setFlags (std::string newFlags) { mFlags = newFlags; };
+    std::string getFlags () { return mFlags; };
     void setServices (std::string newServices) { mServices = newServices; };
+    std::string getServices () { return mServices; };
     void setRegExp (std::string newRegExp) { mRegExp = newRegExp; };
+    std::string getRegExp () { return mRegExp; };
     void setReplacement (std::string newReplacement) { mReplacement = newReplacement; };
+    std::string getReplacement () { return mReplacement; };
 
     virtual void decode(Buffer &buffer);
     virtual void encode(Buffer &buffer);
@@ -63,6 +93,57 @@ private:
     std::string mReplacement;
 };
 
+/** Represents DNS Resource Record
+ *
+ * Each resource record has the following format:
+ *
+ *                                     1  1  1  1  1  1
+ *       0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                                               |
+ *     /                                               /
+ *     /                      NAME                     /
+ *     |                                               |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                      TYPE                     |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                     CLASS                     |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                      TTL                      |
+ *     |                                               |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                   RDLENGTH                    |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
+ *     /                     RDATA                     /
+ *     /                                               /
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ * 
+ * where:
+ * 
+ * NAME            a domain name to which this resource record pertains.
+ * 
+ * TYPE            two octets containing one of the RR type codes.  This
+ *                 field specifies the meaning of the data in the RDATA
+ *                 field.
+ * 
+ * CLASS           two octets which specify the class of the data in the
+ *                 RDATA field.
+ * 
+ * TTL             a 32 bit unsigned integer that specifies the time
+ *                 interval (in seconds) that the resource record may be
+ *                 cached before it should be discarded.  Zero values are
+ *                 interpreted to mean that the RR can only be used for the
+ *                 transaction in progress, and should not be cached.
+ * 
+ * RDLENGTH        an unsigned 16 bit integer that specifies the length in
+ *                 octets of the RDATA field.
+ * 
+ * RDATA           a variable length string of octets that describes the
+ *                 resource.  The format of this information varies
+ *                 according to the TYPE and CLASS of the resource record.
+ *                 For example, the if the TYPE is A and the CLASS is IN,
+ *                 the RDATA field is a 4 octet ARPA Internet address. 
+ */
 class ResourceRecord
 {
 public:
@@ -138,7 +219,6 @@ public:
     std::string asString();
 
 private:
-
     /* Domain name to which this resource record pertains */
     std::string mName;
 
@@ -156,7 +236,6 @@ private:
 
     /* rdata */
     RData *mRData;
-
 };
 
 } // namespace
