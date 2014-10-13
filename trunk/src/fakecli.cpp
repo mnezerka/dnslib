@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     // add NAPTR query
     dns::QuerySection *qs = new dns::QuerySection("biloxi.ims");
     qs->setType(dns::ResourceRecord::typeNAPTR);
-    qs->setClass(dns::ResourceRecord::ClassIN);
+    qs->setClass(dns::QCLASS_IN);
     m.addQuery(qs);
 
     sockfd = socket(AF_INET,SOCK_DGRAM, 0);

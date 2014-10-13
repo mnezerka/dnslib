@@ -27,6 +27,24 @@ void testBuffer()
     assert (strCheck == "www.google.com"); 
 }
 
+void testRDataA()
+{
+    dns::RDataA r;
+
+    char addr[] = { '\x01', '\x02', '\x03', '\x04' };
+    dns::Buffer b(addr, sizeof(addr));
+    r.decode(b);
+    dns::uchar *addr2 = r.getAddress();
+    assert (addr2[0] = 1);
+    assert (addr2[1] = 2);
+    assert (addr2[2] = 3);
+    assert (addr2[3] = 4);
+
+    b.setPos(0);
+    r.encode(b);
+    b.dump();
+}
+
 void testNAPTR()
 {
     dns::RDataNAPTR r;
@@ -86,7 +104,7 @@ void testCreatePacket()
     // add NAPTR answer
     dns::ResourceRecord *rr = new dns::ResourceRecord();
     rr->setType(dns::ResourceRecord::typeNAPTR);
-    rr->setClass(dns::ResourceRecord::ClassIN);
+    rr->setClass(dns::CLASS_IN);
     rr->setTtl(60);
     dns::RDataNAPTR *rdata = new dns::RDataNAPTR();
     rdata->setOrder(50);
@@ -108,6 +126,7 @@ void testCreatePacket()
 int main(int argc, char** argv)
 {
     testBuffer();
+    testRDataA();
     testNAPTR();
     testPacket();
     testCreatePacket();
