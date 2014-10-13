@@ -39,6 +39,97 @@ public:
     virtual std::string asString() = 0;
 };
 
+/**
+ * A Record Representation
+ *
+ * Format:
+ * 
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     |                    ADDRESS                    |
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ * 
+ * where:
+ * 
+ * ADDRESS is a 32 bit Internet address.
+ */
+class RDataA: public RData {
+    public:    
+        RDataA() { for (uint i = 0; i < 4; i++) mAddr[i] = 0; };
+        virtual ~RDataA()  { };
+
+        void setAddress(const uchar *addr) { for (uint i = 0; i < 4; i++) mAddr[i] = addr[i]; };
+        uchar* getAddress() { return mAddr; };
+
+        virtual void decode(Buffer &buffer);
+        virtual void encode(Buffer &buffer);
+        virtual std::string asString();
+
+    private:
+        uchar mAddr[4];
+};
+
+/**
+ * HINFO Record Representation
+ *
+ * Format:
+ * 
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     /                      CPU                      /
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     /                       OS                      /
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ * 
+ * where:
+ * 
+ * CPU             A <character-string> which specifies the CPU type.
+ * 
+ * OS              A <character-string> which specifies the operating system type.
+ */
+class RDataHINFO: public RData {
+    public:    
+        RDataHINFO() : mCpu(""), mOs("") { };
+        virtual ~RDataHINFO() { };
+
+        void setCpu(const std::string newCpu) { mCpu = newCpu; };
+        std::string getCpu() { return mCpu; };
+
+        void setOs(const std::string newOs) { mOs = newOs; };
+        std::string getOs() { return mOs; };
+
+        virtual void decode(Buffer &buffer);
+        virtual void encode(Buffer &buffer);
+        virtual std::string asString();
+
+    private:
+        // CPU type
+        std::string mCpu;
+        // Operating system type
+        std::string mOs;
+};
+
+ /**
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     /                   MADNAME                     /
+ *     /                                               /
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ * 
+ * where:
+ * 
+ * MADNAME         A <domain-name> which specifies a host which has the
+ *                 specified mailbox.
+ * 
+ */
+class RDataMB: public RData {
+    public:    
+        RDataMB() : mMadName("") { };
+        virtual ~RDataMB() { };
+
+    private:
+        // CPU type
+        std::string mMadName;
+};
+
+
 /** Generic RData field which stores raw RData bytes.
  *
  * This class is used for cases when RData type is not known or
@@ -59,8 +150,39 @@ private:
 
 };
 
-// http://www.ietf.org/rfc/rfc2915.txt - NAPTR
+/**
+ * CName Representation
+ *
+ * Data format:
+ * 
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ *     /                     CNAME                     /
+ *     /                                               /
+ *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+ * 
+ * where:
+ * 
+ * CNAME     A <domain-name> which specifies the canonical or primary
+ *           name for the owner.  The owner name is an alias.
+ */
+class RDataCNAME: public RData {
+    public:    
+        RDataCNAME() : mDomainName("") { };
+        virtual ~RDataCNAME() { };
 
+        void setDomainName(const std::string newDomainName) { mDomainName = newDomainName; };
+        std::string getDomainName() { return mDomainName; };
+
+        virtual void decode(Buffer &buffer);
+        virtual void encode(Buffer &buffer);
+        virtual std::string asString();
+
+    private:
+        std::string mDomainName;
+};
+
+
+// http://www.ietf.org/rfc/rfc2915.txt - NAPTR
 class RDataNAPTR : public RData {
 
 public:    
@@ -188,11 +310,8 @@ public:
     static const uint typeOPT = 0x0029;
     static const uint typeANY = 0x00ff;
 
-    /* Typical class */
-    static const uint  ClassIN = 1; 
-
     /* Constructor */
-    ResourceRecord() : mName(""), mType (0), mClass(0), mTtl(0), mRDataSize(0), mRData(NULL) { };
+    ResourceRecord() : mName(""), mType (0), mClass(CLASS_IN), mTtl(0), mRDataSize(0), mRData(NULL) { };
     ~ResourceRecord();
 
     void setName(std::string newName) { mName = newName; };
@@ -201,8 +320,8 @@ public:
     void setType(uint type) { mType = type; };
     uint getType() const;
 
-    void setClass(uint newClass) { mClass = newClass; };
-    uint getClass() const;
+    void setClass(eClass newClass) { mClass = newClass; };
+    eClass getClass() const;
 
     void setTtl(uint newTtl) { mTtl = newTtl; };
     uint getTtl() const;
@@ -226,7 +345,7 @@ private:
     uint mType;
 
     /* Class field */
-    uint mClass;
+    eClass mClass;
 
     /* TTL field */
     uint mTtl;

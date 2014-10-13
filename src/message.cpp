@@ -87,7 +87,7 @@ void Message::decode(const char* buffer, const uint bufferSize)
     {
         std::string qName = buff.getDnsDomainName();
         uint qType = buff.get16bits();
-        uint qClass = buff.get16bits();
+        eQClass qClass = static_cast<eQClass>(buff.get16bits());
 
         QuerySection *qs = new QuerySection(qName);
         qs->setType(qType);

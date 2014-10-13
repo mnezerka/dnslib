@@ -31,6 +31,31 @@
 using namespace dns;
 using namespace std;
 
+/////////// RDataA /////////////////
+
+void RDataA::decode(Buffer &buffer)
+{
+    // get data from buffer
+    const char *data = buffer.getBytes(4);
+    for (uint i = 0; i < 4; i++)
+        mAddr[i] = data[i]; 
+}
+
+void RDataA::encode(Buffer &buffer)
+{
+    for (uint i = 0; i < 4; i++)
+        buffer.put8bits(mAddr[i]);
+}
+
+std::string RDataA::asString()
+{
+    ostringstream text;
+    text << "<<RData A addr=" << static_cast<uint>(mAddr[0]) << '.' << static_cast<uint>(mAddr[1]) << '.' << static_cast<uint>(mAddr[2]) << '.' << static_cast<uint>(mAddr[3]);
+
+    return text.str();
+}
+
+
 /////////// RDataRaw /////////////////
 
 RDataRaw::~RDataRaw()
@@ -62,6 +87,47 @@ std::string RDataRaw::asString()
     text << "<<RData Raw size=" << mDataSize;
     return text.str();
 }
+
+/////////// RDataCNAME /////////////////
+
+void RDataCNAME::decode(Buffer &buffer)
+{
+    mDomainName = buffer.getDnsDomainName();
+}
+
+void RDataCNAME::encode(Buffer &buffer)
+{
+    buffer.putDnsDomainName(mDomainName);
+}
+
+std::string RDataCNAME::asString()
+{
+    ostringstream text;
+    text << "<<CNAME domainName=" << mDomainName;
+    return text.str();
+}
+
+/////////// RDataHINFO /////////////////
+
+void RDataHINFO::decode(Buffer &buffer)
+{
+    mCpu = buffer.getDnsCharacterString();
+    mOs = buffer.getDnsCharacterString();
+}
+
+void RDataHINFO::encode(Buffer &buffer)
+{
+    buffer.putDnsCharacterString(mCpu);
+    buffer.putDnsCharacterString(mOs);
+}
+
+std::string RDataHINFO::asString()
+{
+    ostringstream text;
+    text << "<<HINFO cpu=" << mCpu << " os=" << mOs;
+    return text.str();
+}
+
 
 /////////// RDataNAPTR /////////////////
 
@@ -104,20 +170,27 @@ void ResourceRecord::decode(Buffer &buffer)
 {
     mName = buffer.getDnsDomainName();
     mType = buffer.get16bits();
-    mClass = buffer.get16bits();
+    mClass = static_cast<eClass>(buffer.get16bits());
     mTtl = buffer.get32bits();
     mRDataSize = buffer.get16bits();
     if (mRDataSize > 0)
     {
         switch (mType) {
+            case typeA:
+                mRData = new RDataA();
+                mRData->decode(buffer);
+                break;
             case typeNAPTR:
                 mRData = new RDataNAPTR();
+                mRData->decode(buffer);
+                break;
+            case typeCNAME:
+                mRData = new RDataCNAME();
                 mRData->decode(buffer);
                 break;
             default:
                 mRData = new RDataRaw(mRDataSize);
                 mRData->decode(buffer);
-                //rr->setRData(buffer.getBytes(rrRLength), rrRLength);
         }
     }
 }

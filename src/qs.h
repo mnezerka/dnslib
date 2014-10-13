@@ -68,13 +68,13 @@ class QuerySection
 public:
 
     /* Constructor */
-    QuerySection(const std::string& qName = "") : mQName(qName), mQType(0), mQClass(0) { };
+    QuerySection(const std::string& qName = "") : mQName(qName), mQType(0), mQClass(QCLASS_IN) { };
 
     /* Set type of the query */
     void setType(uint qType) { mQType = qType; };
 
     /* Set type class of the query */
-    void setClass(uint qClass) { mQClass = qClass; };
+    void setClass(eQClass qClass) { mQClass = qClass; };
 
     /* Set name field from a string */
     void setName(const std::string& qName) { mQName = qName; } ;
@@ -86,13 +86,13 @@ public:
     uint getType() const;
 
     /* Get the class of the query */
-    uint getClass() const;
+    eQClass getClass() const;
 
     void encode(Buffer &buffer);
 
     std::string asString();
 
-protected:
+private:
 
     // Name of the query
     std::string mQName;
@@ -101,7 +101,7 @@ protected:
     uint mQType;
 
     // Class of the query
-    uint mQClass;
+    eQClass mQClass;
 };
 
 } // namespace

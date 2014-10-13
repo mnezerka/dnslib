@@ -40,12 +40,10 @@ int main(int argc, char** argv)
         dns::Message m;
         m.decode(mesg, n);
 
-        /*
         cout << "-------------------------------------------------------" << endl;
         cout << "Received message:" << endl;
         cout << m.asString() << endl;
         cout << "-------------------------------------------------------" << endl;
-        */
 
         // change type of message to response
         m.setQr(dns::Message::typeResponse);
@@ -53,7 +51,7 @@ int main(int argc, char** argv)
         // add NAPTR answer
         dns::ResourceRecord *rr = new dns::ResourceRecord();
         rr->setType(dns::ResourceRecord::typeNAPTR);
-        rr->setClass(dns::ResourceRecord::ClassIN);
+        rr->setClass(dns::CLASS_IN);
         rr->setTtl(60);
         dns::RDataNAPTR *rdata = new dns::RDataNAPTR();
         rdata->setOrder(50);
@@ -63,7 +61,16 @@ int main(int argc, char** argv)
         rdata->setReplacement("_sip._tcp.icscf.brn56.iit.ims");
         rr->setRData(rdata);
 
-        m.addAnswer(rr);
+        // add A answer
+        dns::ResourceRecord *rrA = new dns::ResourceRecord();
+        rrA->setType(dns::ResourceRecord::typeA);
+        rrA->setClass(dns::CLASS_IN);
+        rrA->setTtl(60);
+        dns::RDataA *rdataA = new dns::RDataA();
+        dns::uchar ip4[4] = {'\x01', '\x02', '\x03', '\x04' };
+        rdataA->setAddress(ip4);
+        rrA->setRData(rdataA);
+        m.addAnswer(rrA);
 
         /*
         cout << "-------------------------------------------------------" << endl;

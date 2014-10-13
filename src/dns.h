@@ -34,6 +34,29 @@ const uint MAX_MSG_LEN = 512;
 const uint MAX_LABEL_LEN = 63;
 const uint MAX_DOMAIN_LEN = 255;
 
+enum eClass {
+    // the Internet
+    CLASS_IN = 1,
+    // the CSNET class (Obsolete)
+    CLASS_CS,
+    // the CHAOS class
+    CLASS_CH,
+    // Hesiod
+    CLASS_HS
+};
+
+enum eQClass {
+    // the Internet
+    QCLASS_IN = 1,
+    // the CSNET class (Obsolete)
+    QCLASS_CS,
+    // the CHAOS class
+    QCLASS_CH,
+    // Hesiod
+    QCLASS_HS,
+    // Any class - *
+    QCLASS_ASTERISK = 255
+};
 
 } // namespace
 #endif	/* _DNS_DNS_H */
