@@ -27,13 +27,99 @@ void testBuffer()
     assert (strCheck == "www.google.com"); 
 }
 
+void testCNAME_MB_MD_MF_MG_MR_NS_PTR()
+{
+    char wireData[] = "\x03\x77\x77\x77\x06\x67\x6f\x6f\x67\x6c\x65\x03\x63\x6f\x6d\x00";
+    dns::uint wireDataSize = sizeof(wireData) - 1;
+    dns::Buffer buff(wireData, wireDataSize);
+
+    dns::RDataCNAME rCNAME;
+    rCNAME.decode(buff, wireDataSize);
+    assert (rCNAME.getName() == "www.google.com"); 
+    assert (rCNAME.getType() == dns::RDATA_CNAME);
+
+    dns::RDataMB rMB;
+    buff.setPos(0);
+    rMB.decode(buff, wireDataSize);
+    assert (rMB.getName() == "www.google.com"); 
+    assert (rMB.getType() == dns::RDATA_MB);
+
+    dns::RDataMD rMD;
+    buff.setPos(0);
+    rMD.decode(buff, wireDataSize);
+    assert (rMD.getName() == "www.google.com"); 
+    assert (rMD.getType() == dns::RDATA_MD);
+
+    dns::RDataMF rMF;
+    buff.setPos(0);
+    rMF.decode(buff, wireDataSize);
+    assert (rMF.getName() == "www.google.com"); 
+    assert (rMF.getType() == dns::RDATA_MF);
+
+    dns::RDataMG rMG;
+    buff.setPos(0);
+    rMG.decode(buff, wireDataSize);
+    assert (rMG.getName() == "www.google.com"); 
+    assert (rMG.getType() == dns::RDATA_MG);
+
+    dns::RDataMR rMR;
+    buff.setPos(0);
+    rMR.decode(buff, wireDataSize);
+    assert (rMR.getName() == "www.google.com"); 
+    assert (rMR.getType() == dns::RDATA_MR);
+
+    dns::RDataNS rNS;
+    buff.setPos(0);
+    rNS.decode(buff, wireDataSize);
+    assert (rNS.getName() == "www.google.com"); 
+    assert (rNS.getType() == dns::RDATA_NS);
+
+    dns::RDataPTR rPTR;
+    buff.setPos(0);
+    rPTR.decode(buff, wireDataSize);
+    assert (rPTR.getName() == "www.google.com"); 
+    assert (rPTR.getType() == dns::RDATA_PTR);
+}
+
+void testHINFO()
+{
+    // TODO
+}
+
+
+void testMINFO()
+{
+    // TODO
+}
+
+void testMX()
+{
+    // TODO
+}
+
+void testNULL()
+{
+    // TODO
+}
+
+void testSOA()
+{
+    // TODO
+}
+
+void testTXT()
+{
+    // TODO
+}
+
 void testRDataA()
 {
     dns::RDataA r;
+    assert (r.getType() == dns::RDATA_A);
 
     char addr[] = { '\x01', '\x02', '\x03', '\x04' };
     dns::Buffer b(addr, sizeof(addr));
-    r.decode(b);
+    r.decode(b, sizeof(addr));
     dns::uchar *addr2 = r.getAddress();
     assert (addr2[0] = 1);
     assert (addr2[1] = 2);
@@ -42,7 +128,11 @@ void testRDataA()
 
     b.setPos(0);
     r.encode(b);
-    b.dump();
+}
+
+void testWKS()
+{
+    // TODO
 }
 
 void testNAPTR()
@@ -51,7 +141,7 @@ void testNAPTR()
 
     char naptr1[] = "\x00\x32\x00\x33\x01\x73\x07\x53\x49\x50\x2b\x44\x32\x54\x00\x04\x5f\x73\x69\x70\x04\x5f\x74\x63\x70\x05\x69\x63\x73\x63\x66\x05\x62\x72\x6e\x35\x36\x03\x69\x69\x74\x03\x69\x6d\x73\x00";
     dns::Buffer b(naptr1, sizeof(naptr1) - 1);
-    r.decode(b);
+    r.decode(b, sizeof(naptr1) - 1);
     assert (r.getOrder() == 50);
     assert (r.getPreference() == 51);
     assert (r.getFlags() == "s");
@@ -103,7 +193,7 @@ void testCreatePacket()
 
     // add NAPTR answer
     dns::ResourceRecord *rr = new dns::ResourceRecord();
-    rr->setType(dns::ResourceRecord::typeNAPTR);
+    rr->setType(dns::RDATA_NAPTR);
     rr->setClass(dns::CLASS_IN);
     rr->setTtl(60);
     dns::RDataNAPTR *rdata = new dns::RDataNAPTR();
@@ -125,10 +215,43 @@ void testCreatePacket()
 
 int main(int argc, char** argv)
 {
+    cout << "testBuffer" << endl;
     testBuffer();
+
+    cout << "testCNAME_MB_MD_MF_MG_MR_NS_PTR" << endl;
+    testCNAME_MB_MD_MF_MG_MR_NS_PTR();
+
+    cout << "testHINFO" << endl;
+    testHINFO();
+
+    cout << "testMINFO" << endl;
+    testMINFO();
+
+    cout << "testMX" << endl;
+    testMX();
+
+    cout << "testNULL" << endl;
+    testNULL();
+
+    cout << "testSOA" << endl;
+    testSOA();
+
+    cout << "testTXT" << endl;
+    testTXT();
+
+    cout << "testWKS" << endl;
+    testWKS();
+
+    cout << "testRDataA" << endl;
     testRDataA();
+
+    cout << "testNAPTR" << endl;
     testNAPTR();
+
+    cout << "testPacket" << endl;
     testPacket();
+
+    cout << "testCreatePacket" << endl;
     testCreatePacket();
 
     return 0;

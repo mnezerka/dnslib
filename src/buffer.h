@@ -101,7 +101,7 @@ public:
     void checkAvailableSpace(const uint additionalSpace);
 
     // Function that dumps the whole buffer
-    void dump();
+    void dump(const uint count = 0);
     
 };
 

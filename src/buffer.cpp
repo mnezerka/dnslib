@@ -373,13 +373,15 @@ void Buffer::putDnsDomainName(const std::string& value)
         put8bits(0);
 }
 
-void Buffer::dump()
+void Buffer::dump(const uint count)
 {
     cout << "Buffer dump" << endl;
     cout << "size: " << mBufferSize << " bytes" << endl;
     cout << "---------------------------------" << setfill('0');
 
-    for (uint i = 0; i < mBufferSize; i++) {
+    uint dumpCount = count > 0 ? count : mBufferSize; 
+
+    for (uint i = 0; i < dumpCount; i++) {
         if ((i % 10) == 0) {
             cout << endl << setw(2) << i << ": ";
         }
