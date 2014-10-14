@@ -127,6 +127,7 @@ int main(int argc, char** argv)
         m.setQr(dns::Message::typeResponse);
 
         // add NAPTR answer
+        /*
         dns::ResourceRecord *rr = new dns::ResourceRecord();
         rr->setType(dns::RDATA_NAPTR);
         rr->setClass(dns::CLASS_IN);
@@ -139,6 +140,7 @@ int main(int argc, char** argv)
         rdata->setReplacement("_sip._tcp.icscf.brn56.iit.ims");
         rr->setRData(rdata);
         m.addAnswer(rr);
+        */
 
         // add A answer
         dns::ResourceRecord *rrA = new dns::ResourceRecord();

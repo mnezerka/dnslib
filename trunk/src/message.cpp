@@ -153,8 +153,6 @@ void Message::encode(char* buffer, const uint bufferSize, uint &validSize)
         (*it)->encode(buff);
 
     validSize = buff.getPos();
-
-    buff.dump(validSize);
 }
 
 string Message::asString()
