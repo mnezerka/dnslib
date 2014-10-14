@@ -33,20 +33,15 @@ namespace dns {
  */
 class Exception : public std::exception {
 public:
-    /**
-     *  Constructor
-     *  @param text Information text to be filled with the reasons of the exception
-     */
-    Exception(std::string& text) : m_text(text) { }
+    // Constructor
+    // @param text Information text to be filled with the reasons of the exception
+    Exception(const std::string& text) : m_text(text) { }
     Exception(const char *text) : m_text(text) { }
     virtual ~Exception() throw() { }
 
-    /**
-     *  Returns the information text string
-     *  @return The information text
-     */
-    const char* what() const throw() {
-        
+    // Returns the information text string
+    virtual const char* what() const throw()
+    {
         return m_text.data();
     }
 

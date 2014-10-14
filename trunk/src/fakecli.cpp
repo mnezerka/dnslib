@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 
     // add NAPTR query
     dns::QuerySection *qs = new dns::QuerySection("biloxi.ims");
-    qs->setType(dns::ResourceRecord::typeNAPTR);
+    qs->setType(dns::RDATA_NAPTR);
     qs->setClass(dns::QCLASS_IN);
     m.addQuery(qs);
 
