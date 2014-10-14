@@ -273,6 +273,97 @@ std::string RDataA::asString()
     return text.str();
 }
 
+/////////// RDataWKS /////////////////
+
+RDataWKS::~RDataWKS()
+{
+    delete[] mBitmap;
+    mBitmap = NULL;
+}
+
+void RDataWKS::decode(Buffer &buffer, const uint size)
+{
+    // get ip address 
+    const char *data = buffer.getBytes(4);
+    for (uint i = 0; i < 4; i++)
+        mAddr[i] = data[i]; 
+
+    // get protocol
+    mProtocol = buffer.get8bits();
+
+    // get bitmap 
+    mBitmapSize = size - 5; 
+    data = buffer.getBytes(mBitmapSize);
+ 
+    // allocate new memory
+    mBitmap = new char[size];
+
+    // copy rdata
+    std::memcpy(mBitmap, data, mBitmapSize);
+}
+
+void RDataWKS::encode(Buffer &buffer)
+{
+    // put ip address
+    for (uint i = 0; i < 4; i++)
+        buffer.put8bits(mAddr[i]);
+
+    // put protocol
+    buffer.put8bits(mProtocol);
+
+    // put bitmap
+    if (mBitmapSize > 0)
+        buffer.putBytes(mBitmap, mBitmapSize);
+}
+
+std::string RDataWKS::asString()
+{
+    ostringstream text;
+    text << "<<RData WKS addr=";
+    for (unsigned int i = 0; i < 4; i++)
+    {
+        if (i > 0)
+            text << '.';
+        text << static_cast<uint>(mAddr[i]);
+    }
+    text << " protocol=" << mProtocol;
+    text << " bitmap-size=" << mBitmapSize;
+    return text.str();
+}
+
+
+/////////// RDataAAAA /////////////////
+
+void RDataAAAA::decode(Buffer &buffer, const uint size)
+{
+    // get data from buffer
+    const char *data = buffer.getBytes(16);
+    for (uint i = 0; i < 16; i++)
+        mAddr[i] = data[i]; 
+}
+
+void RDataAAAA::encode(Buffer &buffer)
+{
+    for (uint i = 0; i < 16; i++)
+        buffer.put8bits(mAddr[i]);
+}
+
+std::string RDataAAAA::asString()
+{
+    ostringstream text;
+    text << "<<RData AAAA addr=";
+    for (unsigned int i = 0; i < 16; i += 2)
+    {
+        if (i > 0)
+            text << ':';
+
+        text << hex << setw(2) << setfill('0') << static_cast<uint>(mAddr[i]);
+        text << hex << setw(2) << setfill('0') << static_cast<uint>(mAddr[i + 1]);
+    }
+    return text.str();
+}
+
+
 /////////// RDataNAPTR /////////////////
 
 void RDataNAPTR::decode(Buffer &buffer, const uint size)
@@ -365,6 +456,9 @@ void ResourceRecord::decode(Buffer &buffer)
             case RDATA_WKS:
                 mRData = new RDataA();
                 break;
+            case RDATA_AAAA:
+                mRData = new RDataAAAA();
+                break;
             case RDATA_NAPTR:
                 mRData = new RDataNAPTR();
                 break;
@@ -376,7 +470,6 @@ void ResourceRecord::decode(Buffer &buffer)
         if (buffer.getPos() - bPos != mRDataSize)
             throw (Exception("Number of decoded bytes are different than expected size"));
     }
-
 }
 
 void ResourceRecord::encode(Buffer &buffer)

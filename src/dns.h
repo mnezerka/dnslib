@@ -95,6 +95,8 @@ enum eRDataType {
     RDATA_MX = 15,
     // text strings
     RDATA_TXT = 16,
+    // IPv6 address
+    RDATA_AAAA = 28,
     // naming authority pointer
     RDATA_NAPTR = 35,
     RDATA_SRV = 0x0021,

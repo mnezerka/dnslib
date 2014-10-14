@@ -83,33 +83,39 @@ void testCNAME_MB_MD_MF_MG_MR_NS_PTR()
 
 void testHINFO()
 {
-    // TODO
+    dns::RDataHINFO r;
+    assert (r.getType() == dns::RDATA_HINFO);
 }
 
 
 void testMINFO()
 {
-    // TODO
+    dns::RDataMINFO r;
+    assert (r.getType() == dns::RDATA_MINFO);
 }
 
 void testMX()
 {
-    // TODO
+    dns::RDataMX r;
+    assert (r.getType() == dns::RDATA_MX);
 }
 
 void testNULL()
 {
-    // TODO
+    dns::RDataNULL r;
+    assert (r.getType() == dns::RDATA_NULL);
 }
 
 void testSOA()
 {
-    // TODO
+    dns::RDataSOA r;
+    assert (r.getType() == dns::RDATA_SOA);
 }
 
 void testTXT()
 {
-    // TODO
+    dns::RDataTXT r;
+    assert (r.getType() == dns::RDATA_TXT);
 }
 
 void testRDataA()
@@ -121,10 +127,10 @@ void testRDataA()
     dns::Buffer b(addr, sizeof(addr));
     r.decode(b, sizeof(addr));
     dns::uchar *addr2 = r.getAddress();
-    assert (addr2[0] = 1);
-    assert (addr2[1] = 2);
-    assert (addr2[2] = 3);
-    assert (addr2[3] = 4);
+    assert (addr2[0] == 1);
+    assert (addr2[1] == 2);
+    assert (addr2[2] == 3);
+    assert (addr2[3] == 4);
 
     b.setPos(0);
     r.encode(b);
@@ -132,7 +138,34 @@ void testRDataA()
 
 void testWKS()
 {
-    // TODO
+    dns::RDataWKS r;
+    assert (r.getType() == dns::RDATA_WKS);
+
+    char wksData[] = { '\x01', '\x02', '\x03', '\x04', '\xaa', '\xff', '\xef'};
+    dns::Buffer b(wksData, sizeof(wksData));
+    r.decode(b, sizeof(wksData));
+
+    assert(r.getProtocol() == 0xaa);
+    assert(r.getBitmapSize() == 2);
+
+    b.setPos(0);
+    r.encode(b);
+}
+
+void testRDataAAAA()
+{
+    dns::RDataAAAA r;
+    assert (r.getType() == dns::RDATA_AAAA);
+
+    char addr[] = { '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07', '\x08', '\x09', '\x0a', '\x0b', '\x0c', '\x0d', '\x0e', '\x0f', '\x10' };
+    dns::Buffer b(addr, sizeof(addr));
+    r.decode(b, sizeof(addr));
+    dns::uchar *addr2 = r.getAddress();
+    for (unsigned int i = 0; i < 16; i++)
+        assert (addr2[i] == i + 1);
+
+    b.setPos(0);
+    r.encode(b);
 }
 
 void testNAPTR()
@@ -244,6 +277,9 @@ int main(int argc, char** argv)
 
     cout << "testRDataA" << endl;
     testRDataA();
+
+    cout << "testRDataAAAA" << endl;
+    testRDataAAAA();
 
     cout << "testNAPTR" << endl;
     testNAPTR();
