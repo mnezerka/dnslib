@@ -339,7 +339,7 @@ class RDataTXT: public RData {
 };
 
 /**
- * A Record Representation
+ * A Record Representation (IPv4 address)
  */
 class RDataA: public RData {
     public:    
@@ -365,12 +365,17 @@ class RDataA: public RData {
  */
 class RDataWKS: public RData {
     public:    
-        RDataWKS() : mProtocol(0), mBitmap(NULL) { for (uint i = 0; i < 4; i++) mAddr[i] = 0; };
-        virtual ~RDataWKS() { };
+        RDataWKS() : mProtocol(0), mBitmap(NULL), mBitmapSize(0) { for (uint i = 0; i < 4; i++) mAddr[i] = 0; };
+        virtual ~RDataWKS();
         virtual eRDataType getType() { return RDATA_WKS; };
+
+        void setAddress(const uchar *addr) { for (uint i = 0; i < 4; i++) mAddr[i] = addr[i]; };
+        uchar* getAddress() { return mAddr; };
 
         void setProtocol(const uint newProtocol) { mProtocol = newProtocol; };
         uint getProtocol() { return mProtocol; };
+
+        uint getBitmapSize() { return mBitmapSize; }
       
         virtual void decode(Buffer &buffer, const uint size);
         virtual void encode(Buffer &buffer);
@@ -384,7 +389,32 @@ class RDataWKS: public RData {
         // A variable length bit map.  The bit map must be a
         // multiple of 8 bits long.
         char *mBitmap;
+        // Size of bitmap
+        uint mBitmapSize; 
 };
+
+/**
+ * AAAA Record Representation (IPv6 address)
+ */
+class RDataAAAA: public RData {
+    public:    
+        RDataAAAA() { for (uint i = 0; i < 16; i++) mAddr[i] = 0; };
+        virtual ~RDataAAAA()  { };
+
+        virtual eRDataType getType() { return RDATA_AAAA; };
+
+        void setAddress(const uchar *addr) { for (uint i = 0; i < 16; i++) mAddr[i] = addr[i]; };
+        uchar* getAddress() { return mAddr; };
+
+        virtual void decode(Buffer &buffer, const uint size);
+        virtual void encode(Buffer &buffer);
+        virtual std::string asString();
+
+    private:
+        // 128 bit IPv6 address.
+        uchar mAddr[16];
+};
+
 
 // http://www.ietf.org/rfc/rfc2915.txt - NAPTR
 class RDataNAPTR : public RData {
