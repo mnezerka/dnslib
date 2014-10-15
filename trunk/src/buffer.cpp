@@ -238,24 +238,27 @@ std::string Buffer::getDnsDomainName()
 {
     std::string domain;
 
+    // check level to avoid endless recursion
     if (mDnsLabelLevel > 20)
     {
         mDnsLabelLevel = 0;
         throw (Exception("Decoding failed beacuse of more than 20 recursive links used for single domain name compression."));
     }
     else
-    {
         mDnsLabelLevel++ ;
-    }
 
 
+    // read domain name from buffer
     while (true)
     {
+        // get first byte to decide if we are reading link, empty string or string of nonzero length
         uint ctrlCode = get8bits();
+        // if we are on the end of the string
         if (ctrlCode == 0)
         {
             break;
         }
+        // if we are on the link
         else if (ctrlCode >> 6 == 3)
         {
             // read second byte
@@ -272,6 +275,7 @@ std::string Buffer::getDnsDomainName()
             // link always terminates the domain name (no zero at the end in this case) 
             break;
         }
+        // we are reading label
         else
         {
             if (domain.size() > 0)
@@ -286,6 +290,19 @@ std::string Buffer::getDnsDomainName()
 
     mDnsLabelLevel--;
 
+    // check if domain contains only [A-Za-z0-9-] characters 
+
+    for (uint i = 0; i < domain.length(); i++)
+    {
+        if (!((domain[i] >= 'a' && domain[i] <= 'z') ||
+              (domain[i] >= 'A' && domain[i] <= 'Z') ||
+              (domain[i] >= '0' && domain[i] <= '9') ||
+              (domain[i] == '0') || (domain[i] == '.')))
+        {
+            cout << "Invalid char: " << domain[i] << endl;
+            throw (Exception("Decoding failed because domain name contains invalid characters (only [A-Za-z0-9-] are allowed)."));
+        }
+    }
     return domain;
 }
 
@@ -391,6 +408,16 @@ void Buffer::putDnsDomainName(const std::string& value)
     // write terminating zero if no compression tip was found and all labels are writtten to buffer
     if (!compressionTipFound)
         put8bits(0);
+}
+
+std::string Buffer::getDnsDomainNameWithoutCompression()
+{
+    return getDnsDomainName();
+}
+
+void Buffer::putDnsDomainNameWithoutCompression(const std::string& value)
+{
+    putDnsDomainName(value);
 }
 
 void Buffer::dump(const uint count)

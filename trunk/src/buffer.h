@@ -86,6 +86,9 @@ class Buffer
         // Helper function that puts <domain> (according to RFC 1035) to buffer
         void putDnsDomainName(const std::string& value);
 
+        std::string getDnsDomainNameWithoutCompression();
+        void putDnsDomainNameWithoutCompression(const std::string& value);
+
         // Check if there is enough space in buffer  
         void checkAvailableSpace(const uint additionalSpace);
 

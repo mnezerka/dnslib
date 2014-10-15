@@ -396,7 +396,7 @@ void RDataNAPTR::decode(Buffer &buffer, const uint size)
     mFlags = buffer.getDnsCharacterString();
     mServices = buffer.getDnsCharacterString();
     mRegExp = buffer.getDnsCharacterString();
-    mReplacement = buffer.getDnsDomainName(); 
+    mReplacement = buffer.getDnsDomainNameWithoutCompression(); 
 }
 
 void RDataNAPTR::encode(Buffer &buffer)
@@ -406,7 +406,7 @@ void RDataNAPTR::encode(Buffer &buffer)
     buffer.putDnsCharacterString(mFlags);
     buffer.putDnsCharacterString(mServices);
     buffer.putDnsCharacterString(mRegExp);
-    buffer.putDnsDomainName(mReplacement);
+    buffer.putDnsDomainNameWithoutCompression(mReplacement);
 }
 
 std::string RDataNAPTR::asString()
