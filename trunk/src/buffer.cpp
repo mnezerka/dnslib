@@ -116,6 +116,7 @@
 
 #include "buffer.h"
 #include "exception.h"
+
 using namespace dns;
 using namespace std;
 
@@ -137,7 +138,7 @@ void Buffer::put8bits(const uchar value)
     mBufferPtr++;
 }
 
-uint Buffer::get16bits()
+dns::uint Buffer::get16bits()
 {
     // check if we are inside buffer
     checkAvailableSpace(2);        
@@ -159,7 +160,7 @@ void Buffer::put16bits(const uint value)
     mBufferPtr++;
 }
 
-uint Buffer::get32bits()
+dns::uint Buffer::get32bits()
 {
     // check if we are inside buffer
     checkAvailableSpace(4);
@@ -237,9 +238,20 @@ std::string Buffer::getDnsDomainName()
 {
     std::string domain;
 
+    if (mDnsLabelLevel > 20)
+    {
+        mDnsLabelLevel = 0;
+        throw (Exception("Decoding failed beacuse of more than 20 recursive links used for single domain name compression."));
+    }
+    else
+    {
+        mDnsLabelLevel++ ;
+    }
+
+
     while (true)
     {
-        uchar ctrlCode = get8bits();
+        uint ctrlCode = get8bits();
         if (ctrlCode == 0)
         {
             break;
@@ -247,7 +259,7 @@ std::string Buffer::getDnsDomainName()
         else if (ctrlCode >> 6 == 3)
         {
             // read second byte
-            uchar ctrlCode2 = get8bits();
+            uint ctrlCode2 = get8bits();
             uint linkAddr = ((ctrlCode & 63) << 8) + ctrlCode2;
             // change buffer position
             uint saveBuffPos = getPos();
@@ -264,20 +276,26 @@ std::string Buffer::getDnsDomainName()
         {
             if (domain.size() > 0)
                 domain.append(".");
+
+            if (ctrlCode > MAX_LABEL_LEN)
+                throw(Exception("Decoding failed because of too long domain label (max length is 63 characters)"));
+
             domain.append(getBytes(ctrlCode), ctrlCode); // read label
         }
     }
+
+    mDnsLabelLevel--;
 
     return domain;
 }
 
 void Buffer::putDnsDomainName(const std::string& value)
 {
-    char domain[MAX_LABEL_LEN + 1]; // one additional byte for teminating zero byte
-    uint domainLabelIndexes[MAX_LABEL_LEN + 1]; // one additional byte for teminating zero byte
+    char domain[MAX_DOMAIN_LEN + 1]; // one additional byte for teminating zero byte
+    uint domainLabelIndexes[MAX_DOMAIN_LEN + 1]; // one additional byte for teminating zero byte
 
     if (value.length() > MAX_DOMAIN_LEN)
-        throw(Exception("domain name too long to be stored in dns message (limit is 63 characters)"));
+        throw(Exception("Domain name too long to be stored in dns message"));
 
     // write empty domain
     if (value.length() == 0)
@@ -297,6 +315,8 @@ void Buffer::putDnsDomainName(const std::string& value)
     {    
         if (value[ix] == '.' || ix == value.length())
         {
+            if (labelLen > MAX_LABEL_LEN)
+                throw(Exception("Encoding failed because of too long domain label (max length is 63 characters)"));
             domain[labelLenPos] = labelLen; 
             domainLabelIndexes[domainLabelIndexesCount++] = labelLenPos; 
             // finish at the end of the string value 
