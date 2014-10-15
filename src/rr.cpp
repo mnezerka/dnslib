@@ -51,7 +51,7 @@ std::string RDataCNAME::asString()
     text << "<<CNAME domainName=" << getName();
     return text.str();
 }
-//
+
 /////////// RDataHINFO /////////////////
 
 void RDataHINFO::decode(Buffer &buffer, const uint size)
@@ -81,7 +81,7 @@ std::string RDataMB::asString()
     text << "<<MB madname=" << getName();
     return text.str();
 }
-//
+
 /////////// RDataMD /////////////////
 
 std::string RDataMD::asString()
@@ -90,7 +90,7 @@ std::string RDataMD::asString()
     text << "<<MD madname=" << getName();
     return text.str();
 }
-//
+
 /////////// RDataMF /////////////////
 
 std::string RDataMF::asString()
@@ -113,12 +113,14 @@ std::string RDataMG::asString()
 
 void RDataMINFO::decode(Buffer &buffer, const uint size)
 {
-    // TODO
+    mRMailBx = buffer.getDnsDomainName();
+    mMailBx = buffer.getDnsDomainName();
 }
 
 void RDataMINFO::encode(Buffer &buffer)
 {
-    // TODO
+    buffer.putDnsDomainName(mRMailBx);
+    buffer.putDnsDomainName(mMailBx);
 }
 
 std::string RDataMINFO::asString()
@@ -127,7 +129,6 @@ std::string RDataMINFO::asString()
     text << "<<MINFO rmailbx=" << mRMailBx << " mailbx=" << mMailBx;
     return text.str();
 }
-
 
 /////////// RDataMR /////////////////
 
@@ -142,12 +143,14 @@ std::string RDataMR::asString()
 /////////// RDataMX /////////////////
 void RDataMX::decode(Buffer &buffer, const uint size)
 {
-    // TODO
+    mPreference = buffer.get16bits();
+    mExchange = buffer.getDnsDomainName();
 }
 
 void RDataMX::encode(Buffer &buffer)
 {
-    // TODO
+    buffer.put16bits(mPreference);
+    buffer.putDnsDomainName(mExchange);
 }
 
 std::string RDataMX::asString()
@@ -188,7 +191,7 @@ void RDataNULL::encode(Buffer &buffer)
 std::string RDataNULL::asString()
 {
     ostringstream text;
-    text << "<<RData Raw size=" << mDataSize;
+    text << "<<NULL size=" << mDataSize;
     return text.str();
 }
 
@@ -214,18 +217,32 @@ std::string RDataPTR::asString()
 
 void RDataSOA::decode(Buffer &buffer, const uint size)
 {
-    // TODO
+    mMName = buffer.getDnsDomainName();
+    mRName = buffer.getDnsDomainName();
+    mSerial = buffer.get32bits();
+    mRefresh = buffer.get32bits();
+    mRetry = buffer.get32bits();
+    mExpire = buffer.get32bits();
+    mMinimum = buffer.get32bits();
 }
 
 void RDataSOA::encode(Buffer &buffer)
 {
-    // TODO
+    buffer.putDnsDomainName(mMName);
+    buffer.putDnsDomainName(mRName);
+    buffer.put32bits(mSerial);
+    buffer.put32bits(mRefresh);
+    buffer.put32bits(mRetry);
+    buffer.put32bits(mExpire);
+    buffer.put32bits(mMinimum);
 }
 
 std::string RDataSOA::asString()
 {
     ostringstream text;
-    text << "<<SOA TODO" ;
+    text << "<<SOA mname=" << mMName << " rname=" << mRName << " serial=" << mSerial;
+    text << " refresh=" << mRefresh << " retry=" << mRefresh << " retry=" << mRetry;
+    text << " expire=" << mExpire << " minimum=" << mMinimum;
     return text.str();
 }
 
@@ -234,18 +251,24 @@ std::string RDataSOA::asString()
 
 void RDataTXT::decode(Buffer &buffer, const uint size)
 {
-    // TODO
+    mTexts.clear();
+    uint posStart = buffer.getPos();
+    while (buffer.getPos() - posStart < size)
+        mTexts.push_back(buffer.getDnsCharacterString());
 }
 
 void RDataTXT::encode(Buffer &buffer)
 {
-    // TODO
+    for(std::vector<std::string>::iterator it = mTexts.begin(); it != mTexts.end(); ++it)
+        buffer.putDnsCharacterString(*it);
 }
 
 std::string RDataTXT::asString()
 {
     ostringstream text;
-    text << "<<TXT TODO" ;
+    text << "<<TXT items=" << mTexts.size() ;
+    for(std::vector<std::string>::iterator it = mTexts.begin(); it != mTexts.end(); ++it)
+        text << " '" << (*it) << "'";
     return text.str();
 }
 
@@ -415,7 +438,7 @@ void ResourceRecord::decode(Buffer &buffer)
                 mRData = new RDataCNAME();
                 break;
             case RDATA_HINFO:
-                mRData = new RDataCNAME();
+                mRData = new RDataHINFO();
                 break;
             case RDATA_MB:
                 mRData = new RDataMB();
@@ -496,7 +519,7 @@ void ResourceRecord::encode(Buffer &buffer)
 std::string ResourceRecord::asString()
 {
     ostringstream text;
-    text << "<DNS RR: "  << mName << " rtype=" << mType << " rclass=" << mClass << " ttl=" << mTtl << " rdata=" <<  mRDataSize << " bytes ";
+    //text << "<DNS RR: "  << mName << " rtype=" << mType << " rclass=" << mClass << " ttl=" << mTtl << " rdata=" <<  mRDataSize << " bytes ";
     if (mRData)
         text << mRData->asString();
     text << endl;

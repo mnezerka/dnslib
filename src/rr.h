@@ -323,19 +323,19 @@ class RDataSOA: public RData {
  */
 class RDataTXT: public RData {
     public:    
-        RDataTXT() : mTxt("") { };
+        RDataTXT() { };
         virtual ~RDataTXT() { };
         virtual eRDataType getType() { return RDATA_TXT; };
         virtual void decode(Buffer &buffer, const uint size);
         virtual void encode(Buffer &buffer);
         virtual std::string asString();
 
-        virtual void setTxt(const std::string& newTxt) { mTxt = newTxt; };
-        virtual std::string getTxt() { return mTxt; };
+        virtual void addTxt(const std::string& newTxt) { mTexts.push_back(newTxt); };
+        //virtual std::string getTxt() { return mTxt; };
 
     private:
         // One or more <character-string>s. 
-        std::string mTxt;
+        std::vector<std::string> mTexts;
 };
 
 /**

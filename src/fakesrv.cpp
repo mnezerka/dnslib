@@ -88,7 +88,10 @@ int main(int argc, char** argv)
     socklen_t len;
     sockfd = socket(AF_INET,SOCK_DGRAM,0);
     if (sockfd == -1)
-	    throw (dns::Exception("Error creating file descriptor"));
+    {
+	    cout << "Error creating file descriptor" << endl;
+        return 1;
+    }
     if (verbosityLevel >= verbosityBasic)
         cout << "socket created (" << sockfd << ")" << endl;
 
@@ -99,9 +102,8 @@ int main(int argc, char** argv)
     servaddr.sin_port=htons(listenPort);
     if (bind(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr)) == -1)
     {
-        std::stringstream msg;
-		msg  << "Error binding socket, addr: " << listenIp << ":" << listenPort << ", fd:" << sockfd << " (" << strerror(errno) << ")";
-	    throw (dns::Exception(msg.str()));
+		cout  << "Error binding socket, addr: " << listenIp << ":" << listenPort << ", fd:" << sockfd << " (" << strerror(errno) << ")" << endl;
+        return 1;
     }
     if (verbosityLevel >= verbosityBasic)
         cout << "socket binded (port " << listenPort << ")" << endl;
@@ -111,9 +113,18 @@ int main(int argc, char** argv)
     {
         len = sizeof(cliaddr);
         int n = recvfrom(sockfd, mesg, MAX_MSG, 0, (struct sockaddr *)&cliaddr, &len);
-        //cout << "received " << n << "bytes" << endl; 
+        if (verbosityLevel >= verbosityAll)
+            cout << "Received " << n << "bytes" << endl; 
         dns::Message m;
-        m.decode(mesg, n);
+        try
+        {
+            m.decode(mesg, n);
+        }
+        catch (dns::Exception e)
+        {
+            cout << "DNS exception occured when parsing incoming data: " << e.what() << endl;
+            continue;
+        }
 
         if (verbosityLevel >= verbosityAll)
         {
