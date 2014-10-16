@@ -20,7 +20,7 @@ using namespace std;
 #define VERSION_MINOR 1
 
 #define VERBOSITY_NONE "none"
-#define VERBOSITY_BASIC "none"
+#define VERBOSITY_BASIC "basic"
 #define VERBOSITY_ALL "all"
 
 void displayUsage(void)
@@ -36,7 +36,7 @@ void displayUsage(void)
 
 int main(int argc, char** argv)
 {
-    enum eVerbosityLevel { verbosityNone, verbosityBasic, verbosityAll} verbosityLevel = verbosityAll;
+    enum eVerbosityLevel { verbosityNone = 0, verbosityBasic, verbosityAll} verbosityLevel = verbosityAll;
 
     // ip address for listening
     std::string listenIp = "127.0.0.1";
@@ -57,9 +57,13 @@ int main(int argc, char** argv)
 				break;
 			case 'e':
 				if (strcmp(optarg, VERBOSITY_NONE) == 0)
+                {
                     verbosityLevel = verbosityNone;
+                }
 				else if (strcmp(optarg, VERBOSITY_BASIC) == 0)
+                {
                     verbosityLevel = verbosityBasic;
+                }
                 else
                     verbosityLevel = verbosityAll;
 				break;
@@ -113,14 +117,15 @@ int main(int argc, char** argv)
     {
         len = sizeof(cliaddr);
         int n = recvfrom(sockfd, mesg, MAX_MSG, 0, (struct sockaddr *)&cliaddr, &len);
-        if (verbosityLevel >= verbosityAll)
-            cout << "Received " << n << "bytes" << endl; 
+        if (verbosityLevel >= verbosityBasic)
+            cout << "Received DNS packet (" << i << ") of size " << n << " bytes" << endl; 
+
         dns::Message m;
         try
         {
             m.decode(mesg, n);
         }
-        catch (dns::Exception e)
+        catch (dns::Exception& e)
         {
             cout << "DNS exception occured when parsing incoming data: " << e.what() << endl;
             continue;
@@ -129,7 +134,6 @@ int main(int argc, char** argv)
         if (verbosityLevel >= verbosityAll)
         {
             cout << "-------------------------------------------------------" << endl;
-            cout << "Received message:" << endl;
             cout << m.asString() << endl;
             cout << "-------------------------------------------------------" << endl;
         }
@@ -166,13 +170,15 @@ int main(int argc, char** argv)
 
         uint mesgSize;
         m.encode(mesg, MAX_MSG, mesgSize);
+
+        if (verbosityLevel >= verbosityBasic)
+            cout << "Sending DNS packet (" << i << ") of size " << mesgSize << " bytes" << endl; 
+
         if (verbosityLevel >= verbosityAll)
         {
             cout << "-------------------------------------------------------" << endl;
-            cout << "Sending message:" << endl;
             cout << m.asString() << endl;
             cout << "-------------------------------------------------------" << endl;
-            cout << "sending " << mesgSize << " bytes" << endl;
         }
 
         sendto(sockfd, mesg, mesgSize, 0, (struct sockaddr *)&cliaddr,sizeof(cliaddr));

@@ -234,19 +234,18 @@ void Buffer::putDnsCharacterString(const std::string& value)
     putBytes(value.c_str(), value.length());
 }
 
-std::string Buffer::getDnsDomainName()
+std::string Buffer::getDnsDomainName(const bool compressionAllowed)
 {
     std::string domain;
 
-    // check level to avoid endless recursion
-    if (mDnsLabelLevel > 20)
-    {
-        mDnsLabelLevel = 0;
-        throw (Exception("Decoding failed beacuse of more than 20 recursive links used for single domain name compression."));
-    }
+    // store current position to avoid of endless recursion for "bad link addresses"
+    if (std::find(mLinkPos.begin(), mLinkPos.end(), getPos()) == mLinkPos.end())
+        mLinkPos.push_back(getPos());
     else
-        mDnsLabelLevel++ ;
-
+    {
+        mLinkPos.clear();
+        throw (Exception("Decoding of domain failed because labels compression contains endless loop of links"));
+    }
 
     // read domain name from buffer
     while (true)
@@ -261,7 +260,11 @@ std::string Buffer::getDnsDomainName()
         // if we are on the link
         else if (ctrlCode >> 6 == 3)
         {
-            // read second byte
+            // check if compression is allowed
+            if (!compressionAllowed) 
+                throw(Exception("Decoding of domain failed because compression link found where links are not allowed"));
+
+            // read second byte and get link address
             uint ctrlCode2 = get8bits();
             uint linkAddr = ((ctrlCode & 63) << 8) + ctrlCode2;
             // change buffer position
@@ -278,20 +281,18 @@ std::string Buffer::getDnsDomainName()
         // we are reading label
         else
         {
-            if (domain.size() > 0)
-                domain.append(".");
-
             if (ctrlCode > MAX_LABEL_LEN)
                 throw(Exception("Decoding failed because of too long domain label (max length is 63 characters)"));
+
+            if (domain.size() > 0)
+                domain.append(".");
 
             domain.append(getBytes(ctrlCode), ctrlCode); // read label
         }
     }
 
-    mDnsLabelLevel--;
-
     // check if domain contains only [A-Za-z0-9-] characters 
-
+    /*
     for (uint i = 0; i < domain.length(); i++)
     {
         if (!((domain[i] >= 'a' && domain[i] <= 'z') ||
@@ -303,10 +304,16 @@ std::string Buffer::getDnsDomainName()
             throw (Exception("Decoding failed because domain name contains invalid characters (only [A-Za-z0-9-] are allowed)."));
         }
     }
+    */
+    mLinkPos.pop_back();
+
+    if (domain.length() > MAX_DOMAIN_LEN)
+        throw(Exception("Decoding of domain name failed - domain name is too long."));
+    
     return domain;
 }
 
-void Buffer::putDnsDomainName(const std::string& value)
+void Buffer::putDnsDomainName(const std::string& value, const bool compressionAllowed)
 {
     char domain[MAX_DOMAIN_LEN + 1]; // one additional byte for teminating zero byte
     uint domainLabelIndexes[MAX_DOMAIN_LEN + 1]; // one additional byte for teminating zero byte
@@ -357,67 +364,66 @@ void Buffer::putDnsDomainName(const std::string& value)
         ix++;
     }
 
-    // look for domain name parts in buffer and look for fragments for compression
-    // loop over all domain labels 
-    bool compressionTipFound = false;
-    uint compressionTipPos = 0;
-    for (uint i = 0; i < domainLabelIndexesCount; i++)
+    if (compressionAllowed)
     {
-        // position of current label in domain buffer
-        uint domainLabelPos = (uint)domainLabelIndexes[i];
-        // pointer to subdomain (including initial byte for first label length) 
-        char* subDomain = domain + domainLabelPos;
-        // length of subdomain (e.g. |3|i|m|s|2|c|z|0| for blue.ims.cz)
-        uint subDomainLen = domainPos - domainLabelPos;
-
-        // find buffer range that makes sense to search in
-        uint buffLen = mBufferPtr - mBuffer;
-        // if buffer is large enought for searching
-        if (buffLen > subDomainLen)
+        // look for domain name parts in buffer and look for fragments for compression
+        // loop over all domain labels 
+        bool compressionTipFound = false;
+        uint compressionTipPos = 0;
+        for (uint i = 0; i < domainLabelIndexesCount; i++)
         {
-            // modify buffer length
-            buffLen -= subDomainLen;
-            // go through buffer from beginning and try to find occurence of compression tip
-            for (uint buffPos = 0; buffPos < buffLen ; buffPos++)
-            { 
-                // compare compression tip and content at current position in buffer
-                compressionTipFound = (memcmp(mBuffer + buffPos, subDomain, subDomainLen) == 0); 
-                if (compressionTipFound)
-                {
-                    compressionTipPos = buffPos;
-                    break;
+            // position of current label in domain buffer
+            uint domainLabelPos = (uint)domainLabelIndexes[i];
+            // pointer to subdomain (including initial byte for first label length) 
+            char* subDomain = domain + domainLabelPos;
+            // length of subdomain (e.g. |3|i|m|s|2|c|z|0| for blue.ims.cz)
+            uint subDomainLen = domainPos - domainLabelPos;
+
+            // find buffer range that makes sense to search in
+            uint buffLen = mBufferPtr - mBuffer;
+            // search if buffer is large enough for searching
+            if (buffLen > subDomainLen)
+            {
+                // modify buffer length
+                buffLen -= subDomainLen;
+                // go through buffer from beginning and try to find occurence of compression tip
+                for (uint buffPos = 0; buffPos < buffLen ; buffPos++)
+                { 
+                    // compare compression tip and content at current position in buffer
+                    compressionTipFound = (memcmp(mBuffer + buffPos, subDomain, subDomainLen) == 0); 
+                    if (compressionTipFound)
+                    {
+                        compressionTipPos = buffPos;
+                        break;
+                    }
                 }
             }
+        
+            if (compressionTipFound)
+            {
+                // link starts with value bin(1100000000000000)
+                uint linkValue = 0xc000; 
+                linkValue += compressionTipPos;
+                put16bits(linkValue);
+                break;
+            }
+            else
+            {
+                // write label
+                uint labelLen = subDomain[0];
+                putBytes(subDomain, labelLen + 1);
+            }
         }
-    
-        if (compressionTipFound)
-        {
-            // link starts with value bin(1100000000000000)
-            uint linkValue = 0xc000; 
-            linkValue += compressionTipPos;
-            put16bits(linkValue);
-            break;
-        }
-        else
-        {
-            // write label
-            uint labelLen = subDomain[0];
-            putBytes(subDomain, labelLen + 1);
-        }
+
+        // write terminating zero if no compression tip was found and all labels are writtten to buffer
+        if (!compressionTipFound)
+            put8bits(0);
     }
-    // write terminating zero if no compression tip was found and all labels are writtten to buffer
-    if (!compressionTipFound)
-        put8bits(0);
-}
-
-std::string Buffer::getDnsDomainNameWithoutCompression()
-{
-    return getDnsDomainName();
-}
-
-void Buffer::putDnsDomainNameWithoutCompression(const std::string& value)
-{
-    putDnsDomainName(value);
+    else
+    {
+        // compression is disabled, domain is written as it is
+        putBytes(domain, domainPos);
+    }
 }
 
 void Buffer::dump(const uint count)

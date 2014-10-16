@@ -110,8 +110,8 @@ void Message::decodeResourceRecords(Buffer &buffer, uint count, std::vector<Reso
     for (uint i = 0; i < count; i++)
     {
         ResourceRecord *rr = new ResourceRecord();
-        rr->decode(buffer);
         list.push_back(rr);
+        rr->decode(buffer);
     }
 }
 
