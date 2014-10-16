@@ -29,12 +29,6 @@
 
 namespace dns
 {
-
-struct DomainItem {
-    std::string mDomain;
-    uint pos;
-};
-
 /**
  * Buffer for DNS protocol parsing and serialization
  *
@@ -49,7 +43,7 @@ struct DomainItem {
 class Buffer
 {
     public:
-        Buffer(char* buffer, uint bufferSize) : mBuffer(buffer), mBufferSize(bufferSize), mBufferPtr(buffer), mDnsLabelLevel(0) { }
+        Buffer(char* buffer, uint bufferSize) : mBuffer(buffer), mBufferSize(bufferSize), mBufferPtr(buffer) { }
 
         // get current position in buffer
         uint getPos() { return mBufferPtr - mBuffer; }
@@ -81,13 +75,10 @@ class Buffer
         void putDnsCharacterString(const std::string& value);
 
         // Helper function that gets <domain> (according to RFC 1035) from buffer
-        std::string getDnsDomainName();
+        std::string getDnsDomainName(const bool compressionAllowed = true);
 
         // Helper function that puts <domain> (according to RFC 1035) to buffer
-        void putDnsDomainName(const std::string& value);
-
-        std::string getDnsDomainNameWithoutCompression();
-        void putDnsDomainNameWithoutCompression(const std::string& value);
+        void putDnsDomainName(const std::string& value, const bool compressionAllowed = true);
 
         // Check if there is enough space in buffer  
         void checkAvailableSpace(const uint additionalSpace);
@@ -102,8 +93,8 @@ class Buffer
         const uint mBufferSize;
         // current position in buffer
         char* mBufferPtr;
-        // level of recursion when parsing domain labels 
-        uint mDnsLabelLevel;
+        // list of link positions visited when decoding domain name
+        std::vector<uint> mLinkPos;
 };
 
 } // namespace
