@@ -26,6 +26,30 @@ void testBuffer()
     dns::Buffer buff2(b2, sizeof(b2) - 1);
     strCheck  = buff2.getDnsDomainName();
     assert (strCheck == "www.google.com"); 
+
+    // check encoding of domain name
+    char b3[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    dns::Buffer buff3(b3, sizeof(b3) - 1);
+    buff3.putDnsDomainName("");
+    assert (b3[0] == '\x00');
+    assert (b3[1] == 'x');
+}
+
+void testBufferCharacterString()
+{
+    // check encoding of domain name
+    char b1[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    dns::Buffer buff1(b1, sizeof(b1) - 1);
+    buff1.putDnsCharacterString("");
+    assert (b1[0] == '\x00');
+    assert (b1[1] == 'x');
+
+    buff1.setPos(0);
+    buff1.putDnsCharacterString("ah");
+    assert (b1[0] == '\x02');
+    assert (b1[1] == 'a');
+    assert (b1[2] == 'h');
+    assert (b1[3] == 'x');
 }
 
 void testCNAME_MB_MD_MF_MG_MR_NS_PTR()
@@ -290,6 +314,9 @@ int main(int argc, char** argv)
 {
     cout << "testBuffer" << endl;
     testBuffer();
+
+    cout << "testBufferCharacterString" << endl;
+    testBufferCharacterString();
 
     cout << "testCNAME_MB_MD_MF_MG_MR_NS_PTR" << endl;
     testCNAME_MB_MD_MF_MG_MR_NS_PTR();
