@@ -142,21 +142,22 @@ int main(int argc, char** argv)
         m.setQr(dns::Message::typeResponse);
 
         // add NAPTR answer
-        /*
         dns::ResourceRecord *rr = new dns::ResourceRecord();
         rr->setType(dns::RDATA_NAPTR);
         rr->setClass(dns::CLASS_IN);
         rr->setTtl(60);
         dns::RDataNAPTR *rdata = new dns::RDataNAPTR();
-        rdata->setOrder(50);
-        rdata->setPreference(51);
-        rdata->setServices("SIP+D2T");
-        rdata->setRegExp("");
-        rdata->setReplacement("_sip._tcp.icscf.brn56.iit.ims");
+        rdata->setOrder(1);
+        rdata->setPreference(1);
+        rdata->setFlags("u");
+        rdata->setServices("SIP+E2U");
+        rdata->setRegExp("!.*!domena.cz!");
+        rdata->setReplacement("");
         rr->setRData(rdata);
         m.addAnswer(rr);
-        */
 
+
+        /*
         // add A answer
         dns::ResourceRecord *rrA = new dns::ResourceRecord();
         rrA->setType(dns::RDATA_A);
@@ -167,6 +168,7 @@ int main(int argc, char** argv)
         rdataA->setAddress(ip4);
         rrA->setRData(rdataA);
         m.addAnswer(rrA);
+        */
 
         uint mesgSize;
         m.encode(mesg, MAX_MSG, mesgSize);
