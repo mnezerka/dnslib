@@ -145,7 +145,7 @@ int main(int argc, char** argv)
         dns::ResourceRecord *rr = new dns::ResourceRecord();
         rr->setType(dns::RDATA_NAPTR);
         rr->setClass(dns::CLASS_IN);
-        rr->setTtl(60);
+        rr->setTtl(1);
         dns::RDataNAPTR *rdata = new dns::RDataNAPTR();
         rdata->setOrder(1);
         rdata->setPreference(1);
