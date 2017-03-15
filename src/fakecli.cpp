@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
  * 
