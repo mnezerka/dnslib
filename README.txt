@@ -17,7 +17,8 @@ Other tests:
  * linted with cppcheck (cppcheck --enable=all *cpp)
  * fake server tested against Codenomicon DNS suite
  
-This code is licensed under the UIUC Open Source License
+This code is licensed under the NCSA Open Source License
+https://opensource.org/licenses/NCSA
  
 Copyright (c) 2014 Michal Nezerka
 All rights reserved.
