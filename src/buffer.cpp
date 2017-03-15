@@ -1,7 +1,7 @@
 /**
  * DNS Buffer 
  *
- * Copyright (c) 2014 Michal Nezerka <michal.nezerka@gmail.com>
+ * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
  * 
  * Developed by: Michal Nezerka
