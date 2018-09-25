@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -22,7 +22,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -59,13 +59,13 @@ using namespace std;
 
 void displayUsage(void)
 {
-	cout << "Fake DNS server" << endl;
-	cout << "usage: fakesrv [-l ip ] [-p port] [-e level] [-h]" << endl;
-	cout << " -l ip      ip address for listening (default is '127.0.0.1')" << endl;
-	cout << " -p port    port for listening ((default is '53')" << endl;
-	cout << " -e level   output verbosity level - 'all', 'basic', 'none' (default is 'all')" << endl;
-	cout << " -h         show usage" << endl;
-	cout << " -v         get version info" << endl;
+    cout << "Fake DNS server" << endl;
+    cout << "usage: fakesrv [-l ip ] [-p port] [-e level] [-h]" << endl;
+    cout << " -l ip      ip address for listening (default is '127.0.0.1')" << endl;
+    cout << " -p port    port for listening ((default is '53')" << endl;
+    cout << " -e level   output verbosity level - 'all', 'basic', 'none' (default is 'all')" << endl;
+    cout << " -h         show usage" << endl;
+    cout << " -v         get version info" << endl;
 }
 
 int main(int argc, char** argv)
@@ -76,50 +76,50 @@ int main(int argc, char** argv)
     std::string listenIp = "127.0.0.1";
 
     // port for listening
-    unsigned int listenPort = 53; 
+    unsigned int listenPort = 53;
 
     // message buffer
     char mesg[MAX_MSG];
 
-	// parse cli arguments 
-	static const char *optString = "l:p:e:hv";
-	int opt = getopt(argc, argv, optString);
-	while(opt != -1) {
-		switch(opt) {
-			case 'l':
-				listenIp = optarg;
-				break;
-			case 'e':
-				if (strcmp(optarg, VERBOSITY_NONE) == 0)
+    // parse cli arguments
+    static const char *optString = "l:p:e:hv";
+    int opt = getopt(argc, argv, optString);
+    while(opt != -1) {
+        switch(opt) {
+            case 'l':
+                listenIp = optarg;
+                break;
+            case 'e':
+                if (strcmp(optarg, VERBOSITY_NONE) == 0)
                 {
                     verbosityLevel = verbosityNone;
                 }
-				else if (strcmp(optarg, VERBOSITY_BASIC) == 0)
+                else if (strcmp(optarg, VERBOSITY_BASIC) == 0)
                 {
                     verbosityLevel = verbosityBasic;
                 }
                 else
                     verbosityLevel = verbosityAll;
-				break;
-			case 'p':
+                break;
+            case 'p':
                 {
                     // convert string value to int
                     std::istringstream(optarg) >> listenPort;
                     break;
                 }
-			case 'h':
-				displayUsage();
-				return 0;
-				break;
-			case 'v':
-				cout << "fakesrv version " << VERSION_MAJOR << "." << VERSION_MINOR << endl;
-				return 0;
-				break;
+            case 'h':
+                displayUsage();
+                return 0;
+                break;
+            case 'v':
+                cout << "fakesrv version " << VERSION_MAJOR << "." << VERSION_MINOR << endl;
+                return 0;
+                break;
 
-		}
-		opt = getopt( argc, argv, optString );
-	}
-    
+        }
+        opt = getopt( argc, argv, optString );
+    }
+
     in_addr listenAddress = {0};
     if (inet_aton(listenIp.c_str(), &listenAddress) == 0)
     {
@@ -134,7 +134,7 @@ int main(int argc, char** argv)
     sockfd = socket(AF_INET,SOCK_DGRAM,0);
     if (sockfd == -1)
     {
-	    cout << "Error creating file descriptor" << endl;
+        cout << "Error creating file descriptor" << endl;
         return 1;
     }
     if (verbosityLevel >= verbosityBasic)
@@ -147,7 +147,7 @@ int main(int argc, char** argv)
     servaddr.sin_port=htons(listenPort);
     if (bind(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr)) == -1)
     {
-		cout  << "Error binding socket, addr: " << inet_ntoa(servaddr.sin_addr) << ":" << listenPort << ", fd:" << sockfd << " (" << strerror(errno) << ")" << endl;
+        cout  << "Error binding socket, addr: " << inet_ntoa(servaddr.sin_addr) << ":" << listenPort << ", fd:" << sockfd << " (" << strerror(errno) << ")" << endl;
         return 1;
     }
     if (verbosityLevel >= verbosityBasic)
@@ -159,7 +159,7 @@ int main(int argc, char** argv)
         len = sizeof(cliaddr);
         int n = recvfrom(sockfd, mesg, MAX_MSG, 0, (struct sockaddr *)&cliaddr, &len);
         if (verbosityLevel >= verbosityBasic)
-            cout << "Received DNS packet (" << i << ") of size " << n << " bytes" << endl; 
+            cout << "Received DNS packet (" << i << ") of size " << n << " bytes" << endl;
 
         dns::Message m;
         try
@@ -215,7 +215,7 @@ int main(int argc, char** argv)
         m.encode(mesg, MAX_MSG, mesgSize);
 
         if (verbosityLevel >= verbosityBasic)
-            cout << "Sending DNS packet (" << i << ") of size " << mesgSize << " bytes" << endl; 
+            cout << "Sending DNS packet (" << i << ") of size " << mesgSize << " bytes" << endl;
 
         if (verbosityLevel >= verbosityAll)
         {
