@@ -36,6 +36,7 @@
 #include <sstream>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <errno.h>
 #include <strings.h>
 #include <string.h>
@@ -118,6 +119,13 @@ int main(int argc, char** argv)
 		}
 		opt = getopt( argc, argv, optString );
 	}
+    
+    in_addr listenAddress = {0};
+    if (inet_aton(listenIp.c_str(), &listenAddress) == 0)
+    {
+        cout << "Warning: Can't parse '" << listenIp << "' as an IP, will listen on '0.0.0.0' instead" << endl;
+        listenAddress.s_addr = htonl(INADDR_ANY);
+    }
 
     // create socket descriptor
     int sockfd;
@@ -135,11 +143,11 @@ int main(int argc, char** argv)
     // bind socket to local address and port
     bzero(&servaddr,sizeof(servaddr));
     servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+    servaddr.sin_addr=listenAddress;
     servaddr.sin_port=htons(listenPort);
     if (bind(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr)) == -1)
     {
-		cout  << "Error binding socket, addr: " << listenIp << ":" << listenPort << ", fd:" << sockfd << " (" << strerror(errno) << ")" << endl;
+		cout  << "Error binding socket, addr: " << inet_ntoa(servaddr.sin_addr) << ":" << listenPort << ", fd:" << sockfd << " (" << strerror(errno) << ")" << endl;
         return 1;
     }
     if (verbosityLevel >= verbosityBasic)
