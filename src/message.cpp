@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -24,7 +24,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -32,7 +32,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
  */
 
 #include <iostream>
@@ -58,8 +58,8 @@ void Message::removeAllRecords()
     for(std::vector<QuerySection*>::iterator it = mQueries.begin(); it != mQueries.end(); ++it)
         delete(*it);
     mQueries.clear();
-     
-    // delete answers 
+
+    // delete answers
     for(std::vector<ResourceRecord*>::iterator it = mAnswers.begin(); it != mAnswers.end(); ++it)
         delete(*it);
     mAnswers.clear();
@@ -69,7 +69,7 @@ void Message::removeAllRecords()
         delete(*it);
     mAuthorities.clear();
 
-    // delete additional 
+    // delete additional
     for(std::vector<ResourceRecord*>::iterator it = mAdditional.begin(); it != mAdditional.end(); ++it)
         delete(*it);
     mAdditional.clear();
@@ -79,7 +79,7 @@ void Message::decode(const char* buffer, const uint bufferSize)
 {
     if (bufferSize > MAX_MSG_LEN)
         throw (Exception("Aborting parse of message which exceedes maximal DNS message length."));
-    Buffer buff(const_cast<char*>(buffer), bufferSize);   
+    Buffer buff(const_cast<char*>(buffer), bufferSize);
 
     // 1. delete all items in lists of message records (queries, resource records)
     removeAllRecords();
@@ -136,7 +136,7 @@ void Message::encode(char* buffer, const uint bufferSize, uint &validSize)
     validSize = 0;
     Buffer buff(buffer, bufferSize);
 
-    // encode header 
+    // encode header
 
     buff.put16bits(mId);
     uint fields = ((mQr & 1) << 15);
@@ -156,7 +156,7 @@ void Message::encode(char* buffer, const uint bufferSize, uint &validSize)
     for(std::vector<QuerySection*>::iterator it = mQueries.begin(); it != mQueries.end(); ++it)
         (*it)->encode(buff);
 
-    // encode answers 
+    // encode answers
     for(std::vector<ResourceRecord*>::iterator it = mAnswers.begin(); it != mAnswers.end(); ++it)
         (*it)->encode(buff);
 
@@ -164,7 +164,7 @@ void Message::encode(char* buffer, const uint bufferSize, uint &validSize)
     for(std::vector<ResourceRecord*>::iterator it = mAuthorities.begin(); it != mAuthorities.end(); ++it)
         (*it)->encode(buff);
 
-    // encode additional 
+    // encode additional
     for(std::vector<ResourceRecord*>::iterator it = mAdditional.begin(); it != mAdditional.end(); ++it)
         (*it)->encode(buff);
 

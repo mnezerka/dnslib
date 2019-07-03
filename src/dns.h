@@ -1,9 +1,9 @@
 /**
- * DNS LIB Globals 
+ * DNS LIB Globals
  *
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -24,7 +24,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -32,7 +32,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
  */
 
 #ifndef _DNS_DNS_H
@@ -89,7 +89,7 @@ enum eRDataType {
     RDATA_MF = 4,
     // the canonical name for an alias
     RDATA_CNAME = 5,
-    // marks the start of a zone of authority 
+    // marks the start of a zone of authority
     RDATA_SOA = 6,
     // a mailbox domain name (EXPERIMENTAL)
     RDATA_MB = 7,
@@ -105,7 +105,7 @@ enum eRDataType {
     RDATA_PTR = 12,
     // host information
     RDATA_HINFO = 13,
-    // mailbox or mail list information 
+    // mailbox or mail list information
     RDATA_MINFO = 14,
     // mail exchange
     RDATA_MX = 15,

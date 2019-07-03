@@ -1,9 +1,9 @@
 /**
- * DNS Buffer 
+ * DNS Buffer
  *
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -24,7 +24,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -32,21 +32,21 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
  * Message compression used by getDomainName and putDomainName:
- * 
+ *
  * In order to reduce the size of messages, the domain system utilizes a
  * compression scheme which eliminates the repetition of domain names in a
  * message.  In this scheme, an entire domain name or a list of labels at
  * the end of a domain name is replaced with a pointer to a prior occurance
  * of the same name.
- * 
+ *
  * The pointer takes the form of a two octet sequence:
- * 
+ *
  *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *     | 1  1|                OFFSET                   |
  *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- * 
+ *
  * The first two bits are ones.  This allows a pointer to be distinguished
  * from a label, since the label must begin with two zero bits because
  * labels are restricted to 63 octets or less.  (The 10 and 01 combinations
@@ -54,36 +54,36 @@
  * the start of the message (i.e., the first octet of the ID field in the
  * domain header).  A zero offset specifies the first byte of the ID field,
  * etc.
- * 
+ *
  * The compression scheme allows a domain name in a message to be
  * represented as either:
- * 
+ *
  *    - a sequence of labels ending in a zero octet
- * 
+ *
  *    - a pointer
- * 
+ *
  *    - a sequence of labels ending with a pointer
- * 
+ *
  * Pointers can only be used for occurances of a domain name where the
  * format is not class specific.  If this were not the case, a name server
  * or resolver would be required to know the format of all RRs it handled.
  * As yet, there are no such cases, but they may occur in future RDATA
  * formats.
- * 
+ *
  * If a domain name is contained in a part of the message subject to a
  * length field (such as the RDATA section of an RR), and compression is
  * used, the length of the compressed name is used in the length
  * calculation, rather than the length of the expanded name.
- * 
+ *
  * Programs are free to avoid using pointers in messages they generate,
  * although this will reduce datagram capacity, and may cause truncation.
  * However all programs are required to understand arriving messages that
  * contain pointers.
- * 
+ *
  * For example, a datagram might need to use the domain names F.ISI.ARPA,
  * FOO.F.ISI.ARPA, ARPA, and the root.  Ignoring the other fields of the
  * message, these domain names might be represented as:
- * 
+ *
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *     20 |           1           |           F           |
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
@@ -97,7 +97,7 @@
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *     30 |           A           |           0           |
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- * 
+ *
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *     40 |           3           |           F           |
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
@@ -105,15 +105,15 @@
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *     44 | 1  1|                20                       |
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- * 
+ *
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *     64 | 1  1|                26                       |
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- * 
+ *
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *     92 |           0           |                       |
  *        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- * 
+ *
  * The domain name for F.ISI.ARPA is shown at offset 20.  The domain name
  * FOO.F.ISI.ARPA is shown at offset 40; this definition uses a pointer to
  * concatenate a label for FOO to the previously defined F.ISI.ARPA.  The
@@ -139,7 +139,7 @@ using namespace std;
 uchar Buffer::get8bits()
 {
     // check if we are inside buffer
-    checkAvailableSpace(1);        
+    checkAvailableSpace(1);
     uchar value = static_cast<uchar> (mBufferPtr[0]);
     mBufferPtr += 1;
 
@@ -149,7 +149,7 @@ uchar Buffer::get8bits()
 void Buffer::put8bits(const uchar value)
 {
     // check if we are inside buffer
-    checkAvailableSpace(1);        
+    checkAvailableSpace(1);
     *mBufferPtr = value & 0xFF;
     mBufferPtr++;
 }
@@ -157,7 +157,7 @@ void Buffer::put8bits(const uchar value)
 dns::uint Buffer::get16bits()
 {
     // check if we are inside buffer
-    checkAvailableSpace(2);        
+    checkAvailableSpace(2);
     uint value = static_cast<uchar> (mBufferPtr[0]);
     value = value << 8;
     value += static_cast<uchar> (mBufferPtr[1]);
@@ -169,7 +169,7 @@ dns::uint Buffer::get16bits()
 void Buffer::put16bits(const uint value)
 {
     // check if we are inside buffer
-    checkAvailableSpace(2);        
+    checkAvailableSpace(2);
     *mBufferPtr = (value & 0xFF00) >> 8;
     mBufferPtr++;
     *mBufferPtr = value & 0xFF;
@@ -209,19 +209,19 @@ void Buffer::setPos(const uint pos)
     // check if we are inside buffer
     if (pos >= mBufferSize)
         throw(Exception("Try to set pos behind buffer"));
-    mBufferPtr = mBuffer + pos; 
+    mBufferPtr = mBuffer + pos;
 }
 
-char* Buffer::getBytes(const uint count) 
+char* Buffer::getBytes(const uint count)
 {
     checkAvailableSpace(count);
-    char *result = mBufferPtr;    
+    char *result = mBufferPtr;
     mBufferPtr += count;
 
     return result;
 }
 
-void Buffer::putBytes(const char* data, const uint count) 
+void Buffer::putBytes(const char* data, const uint count)
 {
     if (count == 0)
         return;
@@ -235,7 +235,7 @@ void Buffer::putBytes(const char* data, const uint count)
 std::string Buffer::getDnsCharacterString()
 {
     std::string result("");
- 
+
     // read first octet (byte) to know length of string
     uint stringLen = get8bits();
     if (stringLen > 0)
@@ -277,7 +277,7 @@ std::string Buffer::getDnsDomainName(const bool compressionAllowed)
         else if (ctrlCode >> 6 == 3)
         {
             // check if compression is allowed
-            if (!compressionAllowed) 
+            if (!compressionAllowed)
                 throw(Exception("Decoding of domain failed because compression link found where links are not allowed"));
 
             // read second byte and get link address
@@ -291,7 +291,7 @@ std::string Buffer::getDnsDomainName(const bool compressionAllowed)
             if (domain.size() > 0)
                 domain.append(".");
             domain.append(linkDomain);
-            // link always terminates the domain name (no zero at the end in this case) 
+            // link always terminates the domain name (no zero at the end in this case)
             break;
         }
         // we are reading label
@@ -307,7 +307,7 @@ std::string Buffer::getDnsDomainName(const bool compressionAllowed)
         }
     }
 
-    // check if domain contains only [A-Za-z0-9-] characters 
+    // check if domain contains only [A-Za-z0-9-] characters
     /*
     for (uint i = 0; i < domain.length(); i++)
     {
@@ -325,7 +325,7 @@ std::string Buffer::getDnsDomainName(const bool compressionAllowed)
 
     if (domain.length() > MAX_DOMAIN_LEN)
         throw(Exception("Decoding of domain name failed - domain name is too long."));
-    
+
     return domain;
 }
 
@@ -351,8 +351,8 @@ void Buffer::putDnsDomainName(const std::string& value, const bool compressionAl
     uint domainPos = 1;
     uint ix = 0;
     uint domainLabelIndexesCount = 0;
-    while (true) 
-    {    
+    while (true)
+    {
         if (value[ix] == '.' || ix == value.length())
         {
             if (labelLen > MAX_LABEL_LEN)
@@ -383,14 +383,14 @@ void Buffer::putDnsDomainName(const std::string& value, const bool compressionAl
     if (compressionAllowed)
     {
         // look for domain name parts in buffer and look for fragments for compression
-        // loop over all domain labels 
+        // loop over all domain labels
         bool compressionTipFound = false;
         uint compressionTipPos = 0;
         for (uint i = 0; i < domainLabelIndexesCount; i++)
         {
             // position of current label in domain buffer
             uint domainLabelPos = (uint)domainLabelIndexes[i];
-            // pointer to subdomain (including initial byte for first label length) 
+            // pointer to subdomain (including initial byte for first label length)
             char* subDomain = domain + domainLabelPos;
             // length of subdomain (e.g. |3|i|m|s|2|c|z|0| for blue.ims.cz)
             uint subDomainLen = domainPos - domainLabelPos;
@@ -404,9 +404,9 @@ void Buffer::putDnsDomainName(const std::string& value, const bool compressionAl
                 buffLen -= subDomainLen;
                 // go through buffer from beginning and try to find occurence of compression tip
                 for (uint buffPos = 0; buffPos < buffLen ; buffPos++)
-                { 
+                {
                     // compare compression tip and content at current position in buffer
-                    compressionTipFound = (memcmp(mBuffer + buffPos, subDomain, subDomainLen) == 0); 
+                    compressionTipFound = (memcmp(mBuffer + buffPos, subDomain, subDomainLen) == 0);
                     if (compressionTipFound)
                     {
                         compressionTipPos = buffPos;
@@ -414,11 +414,11 @@ void Buffer::putDnsDomainName(const std::string& value, const bool compressionAl
                     }
                 }
             }
-        
+
             if (compressionTipFound)
             {
                 // link starts with value bin(1100000000000000)
-                uint linkValue = 0xc000; 
+                uint linkValue = 0xc000;
                 linkValue += compressionTipPos;
                 put16bits(linkValue);
                 break;
@@ -448,7 +448,7 @@ void Buffer::dump(const uint count)
     cout << "size: " << mBufferSize << " bytes" << endl;
     cout << "---------------------------------" << setfill('0');
 
-    uint dumpCount = count > 0 ? count : mBufferSize; 
+    uint dumpCount = count > 0 ? count : mBufferSize;
 
     for (uint i = 0; i < dumpCount; i++) {
         if ((i % 10) == 0) {
@@ -463,11 +463,11 @@ void Buffer::dump(const uint count)
 
 void Buffer::checkAvailableSpace(const uint additionalSpace)
 {
-    // check if buffer pointer is valid 
+    // check if buffer pointer is valid
     if (mBufferPtr < mBuffer)
         throw(Exception("Buffer pointer is invalid"));
 
-    // get position in buffer 
+    // get position in buffer
     uint bufferPos = (mBufferPtr - mBuffer);
 
     // check if we are inside buffer

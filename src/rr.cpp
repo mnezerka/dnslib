@@ -1,9 +1,9 @@
 /**
- * DNS Resource Record 
+ * DNS Resource Record
  *
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -24,7 +24,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -32,7 +32,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
  */
 
 #include <iostream>
@@ -188,7 +188,7 @@ void RDataNULL::decode(Buffer &buffer, const uint size)
 {
     // get data from buffer
     const char *data = buffer.getBytes(size);
- 
+
     // allocate new memory
     mData = new char[size];
 
@@ -295,7 +295,7 @@ void RDataA::decode(Buffer &buffer, const uint size)
     // get data from buffer
     const char *data = buffer.getBytes(4);
     for (uint i = 0; i < 4; i++)
-        mAddr[i] = data[i]; 
+        mAddr[i] = data[i];
 }
 
 void RDataA::encode(Buffer &buffer)
@@ -322,18 +322,18 @@ RDataWKS::~RDataWKS()
 
 void RDataWKS::decode(Buffer &buffer, const uint size)
 {
-    // get ip address 
+    // get ip address
     const char *data = buffer.getBytes(4);
     for (uint i = 0; i < 4; i++)
-        mAddr[i] = data[i]; 
+        mAddr[i] = data[i];
 
     // get protocol
     mProtocol = buffer.get8bits();
 
-    // get bitmap 
-    mBitmapSize = size - 5; 
+    // get bitmap
+    mBitmapSize = size - 5;
     data = buffer.getBytes(mBitmapSize);
- 
+
     // allocate new memory
     mBitmap = new char[size];
 
@@ -378,7 +378,7 @@ void RDataAAAA::decode(Buffer &buffer, const uint size)
     // get data from buffer
     const char *data = buffer.getBytes(16);
     for (uint i = 0; i < 16; i++)
-        mAddr[i] = data[i]; 
+        mAddr[i] = data[i];
 }
 
 void RDataAAAA::encode(Buffer &buffer)
@@ -412,7 +412,7 @@ void RDataNAPTR::decode(Buffer &buffer, const uint size)
     mFlags = buffer.getDnsCharacterString();
     mServices = buffer.getDnsCharacterString();
     mRegExp = buffer.getDnsCharacterString();
-    mReplacement = buffer.getDnsDomainName(false); 
+    mReplacement = buffer.getDnsDomainName(false);
 }
 
 void RDataNAPTR::encode(Buffer &buffer)
@@ -517,15 +517,15 @@ void ResourceRecord::encode(Buffer &buffer)
     buffer.put16bits(mType);
     buffer.put16bits(mClass);
     buffer.put32bits(mTtl);
-    // save position of buffer for later use (write length of RData part)     
-    uint bufferPosRDataLength = buffer.getPos(); 
+    // save position of buffer for later use (write length of RData part)
+    uint bufferPosRDataLength = buffer.getPos();
     buffer.put16bits(0); // this value could be later overwritten
     // encode RData if present
     if (mRData)
     {
         mRData->encode(buffer);
         mRDataSize = buffer.getPos() - bufferPosRDataLength - 2; // 2 because two bytes for RData length are not part of RData block
-        uint bufferLastPos = buffer.getPos(); 
+        uint bufferLastPos = buffer.getPos();
         buffer.setPos(bufferPosRDataLength);
         buffer.put16bits(mRDataSize); // overwritte 0 with actual size of RData
         buffer.setPos(bufferLastPos);

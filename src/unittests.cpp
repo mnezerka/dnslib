@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -22,7 +22,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -53,13 +53,14 @@ void testBuffer()
     assert (strCheck == "hello");
 
     strCheck = b.getDnsCharacterString();
-    assert (strCheck == ""); 
+    assert (strCheck == "");
 
     // check decoding of domain name
     char b2[] = "\x03\x77\x77\x77\x06\x67\x6f\x6f\x67\x6c\x65\x03\x63\x6f\x6d\x00";
     dns::Buffer buff2(b2, sizeof(b2) - 1);
     strCheck  = buff2.getDnsDomainName();
-    assert (strCheck == "www.google.com"); 
+    assert (strCheck == "www.google.com");
+}
 
     // check encoding of domain name
     char b3[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
@@ -94,49 +95,49 @@ void testCNAME_MB_MD_MF_MG_MR_NS_PTR()
 
     dns::RDataCNAME rCNAME;
     rCNAME.decode(buff, wireDataSize);
-    assert (rCNAME.getName() == "www.google.com"); 
+    assert (rCNAME.getName() == "www.google.com");
     assert (rCNAME.getType() == dns::RDATA_CNAME);
 
     dns::RDataMB rMB;
     buff.setPos(0);
     rMB.decode(buff, wireDataSize);
-    assert (rMB.getName() == "www.google.com"); 
+    assert (rMB.getName() == "www.google.com");
     assert (rMB.getType() == dns::RDATA_MB);
 
     dns::RDataMD rMD;
     buff.setPos(0);
     rMD.decode(buff, wireDataSize);
-    assert (rMD.getName() == "www.google.com"); 
+    assert (rMD.getName() == "www.google.com");
     assert (rMD.getType() == dns::RDATA_MD);
 
     dns::RDataMF rMF;
     buff.setPos(0);
     rMF.decode(buff, wireDataSize);
-    assert (rMF.getName() == "www.google.com"); 
+    assert (rMF.getName() == "www.google.com");
     assert (rMF.getType() == dns::RDATA_MF);
 
     dns::RDataMG rMG;
     buff.setPos(0);
     rMG.decode(buff, wireDataSize);
-    assert (rMG.getName() == "www.google.com"); 
+    assert (rMG.getName() == "www.google.com");
     assert (rMG.getType() == dns::RDATA_MG);
 
     dns::RDataMR rMR;
     buff.setPos(0);
     rMR.decode(buff, wireDataSize);
-    assert (rMR.getName() == "www.google.com"); 
+    assert (rMR.getName() == "www.google.com");
     assert (rMR.getType() == dns::RDATA_MR);
 
     dns::RDataNS rNS;
     buff.setPos(0);
     rNS.decode(buff, wireDataSize);
-    assert (rNS.getName() == "www.google.com"); 
+    assert (rNS.getName() == "www.google.com");
     assert (rNS.getType() == dns::RDATA_NS);
 
     dns::RDataPTR rPTR;
     buff.setPos(0);
     rPTR.decode(buff, wireDataSize);
-    assert (rPTR.getName() == "www.google.com"); 
+    assert (rPTR.getName() == "www.google.com");
     assert (rPTR.getType() == dns::RDATA_PTR);
 }
 
@@ -297,7 +298,7 @@ void testPacketInvalid()
     char packet1[] = "\x00\x00\x01\x00\x00\x01\x00\x01\x00\x01\x00\x02\x03\x64\x6e\x73\x05\x73\x75\x69\x74\x65\x05\x6c\x6f\x63\x61\x6c\x00\x00\x01\x00\x01\x03\x64\x6e\x73\x05\x73\x75\x69\x74\x65\x05\x6c\x6f\x63\x61\x6c\x00\x00\x21\x00\x01\x00\x00\x0e\x10\x00\x08\x49\x00\x00\x00\x00\x00\xc8\x00\x01\x41\xc0\x2e\x00\x1e\x00\x01\x00\x00\x0e\x10\x00\x06\x01\x80\x00\x00\x00\x02\x03\x64\x6e\x73\x05\x73\x75\x69\x74\x65\x05\x6c\x6f\x63\x61\x6c\x00\x00\x63\x00\x01\x00\x00\x0e\x10\x00\x0e\x0d\x76\x3d\x73\x70\x66\x31\x20\x65\x78\x70\x3a\x25\x1e\x0b\x68\x6f\x73\x74\x31\x2d\x68\x6f\x73\x74\x32\x00\x00\xfa\x00\xff\x00\x00\x00\x00\x00\x3a\x08\x68\x6d\x61\x63\x2d\x6d\x64\x35\x07\x73\x69\x67\x2d\x61\x6c\x67\x03\x72\x65\x67\x03\x69\x6e\x74\x00\x00\x00\x54\x3e\x44\xe5\x01\x2c\x00\x10\xe7\x01\x33\xed\x6a\x86\xab\x55\x30\xf3\xdd\xf1\x4f\x87\x9f\x6b\x00\x00\x00\x00\x00\x00";
     dns::Message m1;
     try
-    { 
+    {
 
         m1.decode(packet1, sizeof(packet1) - 1);
         cout << m1.asString() << endl;
@@ -307,7 +308,7 @@ void testPacketInvalid()
 
     char packet2[] = "\x00\x00\x01\x00\x00\x01\x00\x00\x00\x01\x00\x01\x02\x31\x31\x01\x31\x02\x31\x30\x02\x31\x30\x07\x69\x6e\x2d\x61\x64\x64\x72\x04\x61\x72\x70\x61\x00\x00\x0c\x00\x01\x03\x64\x6e\x73\x05\x73\x75\x69\x74\x65\x05\x6c\x6f\x63\x61\x6c\x00\x00\x0e\x00\x01\x00\x00\x0e\x10\x00\x30\x1c\x31\x27\x29\x29\x29\x20\x41\x4e\x44\x20\x28\x28\x28\x27\x66\x6f\x6f\x27\x20\x4c\x49\x4b\x45\x20\x27\x66\x6f\x6f\xc0\x12\x03\x64\x6e\x73\x05\x73\x75\x69\x74\x65\x05\x6c\x6f\x63\x61\x6c\x00\x00\x00\x29\x20\x00\x00\x00\x80\x00\x00\x00";
     try
-    { 
+    {
         dns::Message m2;
         m2.decode(packet2, sizeof(packet2) - 1);
         cout << m2.asString() << endl;

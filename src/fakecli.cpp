@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -22,7 +22,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -51,7 +51,7 @@ const int listenPort = 6667;
 int main(int argc, char** argv)
 {
     int sockfd = 0;
-    
+
     struct sockaddr_in servaddr;
     char bufRecv[MAX_MSG];
     char bufSend[MAX_MSG];
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 
     for (unsigned int i = 0; i < 1000000; i++)
     {
-        m.setId(i); 
+        m.setId(i);
 
         uint msgSize;
         m.encode(bufSend, MAX_MSG, msgSize);

@@ -1,9 +1,9 @@
 /**
- * DNS Question Section 
+ * DNS Question Section
  *
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -24,7 +24,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -32,7 +32,7 @@
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
  */
 
 #ifndef _DNS_QS_H
@@ -47,9 +47,9 @@
 namespace dns {
 
 /* Class represents a DNS Question Section Entry
- * 
+ *
  * The DNS Question section entry has the following format:
- * 
+ *
  *                                     1  1  1  1  1  1
  *       0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
  *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
@@ -61,21 +61,21 @@ namespace dns {
  *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
  *     |                     QCLASS                    |
  *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- * 
+ *
  * where:
- * 
+ *
  * QNAME           a domain name represented as a sequence of labels, where
  *                 each label consists of a length octet followed by that
  *                 number of octets.  The domain name terminates with the
  *                 zero length octet for the null label of the root.  Note
  *                 that this field may be an odd number of octets; no
  *                 padding is used.
- * 
+ *
  * QTYPE           a two octet code which specifies the type of the query.
  *                 The values for this field include all codes valid for a
  *                 TYPE field, together with some more general codes which
  *                 can match more than one type of RR.
- * 
+ *
  * QCLASS          a two octet code that specifies the class of the query.
  *                 For example, the QCLASS field is IN for the Internet.
  */

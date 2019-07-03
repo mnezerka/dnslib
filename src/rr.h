@@ -1,9 +1,9 @@
 /**
- * DNS Resource Record 
+ * DNS Resource Record
  *
  * Copyright (c) 2014 Michal Nezerka
  * All rights reserved.
- * 
+ *
  * Developed by: Michal Nezerka
  *               https://github.com/mnezerka/
  *               mailto:michal.nezerka@gmail.com
@@ -24,7 +24,7 @@
  *  * Neither the name of Michal Nezerka, nor the names of its contributors
  *    may be used to endorse or promote products derived from this Software
  *    without specific prior written permission. 
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -59,7 +59,7 @@ class RData {
 * RData with name of type dns domain
 */
 class RDataWithName: public RData {
-    public:    
+    public:
         RDataWithName() : mName("") { };
         virtual ~RDataWithName() { };
         virtual void decode(Buffer &buffer, const uint size);
@@ -77,7 +77,7 @@ class RDataWithName: public RData {
  * CName Representation
  */
 class RDataCNAME: public RDataWithName {
-    public:    
+    public:
         virtual eRDataType getType() { return RDATA_CNAME; };
         virtual std::string asString();
 };
@@ -86,7 +86,7 @@ class RDataCNAME: public RDataWithName {
  * HINFO Record Representation
   */
 class RDataHINFO: public RData {
-    public:    
+    public:
         RDataHINFO() : mCpu(""), mOs("") { };
         virtual ~RDataHINFO() { };
 
@@ -115,19 +115,19 @@ class RDataHINFO: public RData {
  * A name specifies <domain-name> of host which has the specified mailbox.
  */
 class RDataMB: public RDataWithName {
-    public:    
+    public:
         virtual eRDataType getType() { return RDATA_MB; };
         virtual std::string asString();
 };
 
  /**
  * MD RData Representation
- * 
+ *
  * A <domain-name> specifies a host which has a mail agent for the domain
  * which should be able to deliver mail for the domain.
  */
 class RDataMD: public RDataWithName {
-    public:    
+    public:
         virtual eRDataType getType() { return RDATA_MD; };
         virtual std::string asString();
 };
@@ -139,7 +139,7 @@ class RDataMD: public RDataWithName {
  * which will accept mail for forwarding to the domain.
  */
 class RDataMF: public RDataWithName {
-    public:    
+    public:
         virtual eRDataType getType() { return RDATA_MF; };
         virtual std::string asString();
 };
@@ -151,7 +151,7 @@ class RDataMF: public RDataWithName {
 * specified by the domain name.
 */
 class RDataMG: public RDataWithName {
-    public:    
+    public:
         virtual eRDataType getType() { return RDATA_MG; };
         virtual std::string asString();
 };
@@ -160,7 +160,7 @@ class RDataMG: public RDataWithName {
  * MINFO Record Representation
   */
 class RDataMINFO: public RData {
-    public:    
+    public:
         RDataMINFO() : mRMailBx(""), mMailBx("") { };
         virtual ~RDataMINFO() { };
 
@@ -193,7 +193,7 @@ class RDataMINFO: public RData {
 * proper rename of the specified mailbox.
 */
 class RDataMR: public RDataWithName {
-    public:    
+    public:
         virtual eRDataType getType() { return RDATA_MR; };
         virtual std::string asString();
 };
@@ -202,7 +202,7 @@ class RDataMR: public RDataWithName {
  * MX Record Representation
  */
 class RDataMX: public RData {
-    public:    
+    public:
         RDataMX() : mPreference(0), mExchange("") { };
         virtual ~RDataMX() { };
 
@@ -223,7 +223,7 @@ class RDataMX: public RData {
         // this RR among others at the same owner.  Lower values are preferred.
         uint mPreference;
         // A <domain-name> which specifies a host willing to act
-        // as a mail exchange for the owner name 
+        // as a mail exchange for the owner name
         std::string mExchange;
 };
 
@@ -253,7 +253,7 @@ class RDataNULL : public RData {
 * authoritative for the specified class and domain.
 */
 class RDataNS: public RDataWithName {
-    public:    
+    public:
         virtual eRDataType getType() { return RDATA_NS; };
         virtual std::string asString();
 };
@@ -265,7 +265,7 @@ class RDataNS: public RDataWithName {
 * domain name space.
 */
 class RDataPTR: public RDataWithName {
-    public:    
+    public:
         virtual eRDataType getType() { return RDATA_PTR; };
         virtual std::string asString();
 };
@@ -274,7 +274,7 @@ class RDataPTR: public RDataWithName {
  * SOA Record Representation
  */
 class RDataSOA: public RData {
-    public:    
+    public:
         RDataSOA() : mMName(""), mRName(""), mSerial(0), mRefresh(0), mRetry(0), mExpire(0), mMinimum(0) { };
         virtual ~RDataSOA() { };
 
@@ -300,7 +300,7 @@ class RDataSOA: public RData {
 
         void setMinimum(const uint newMinimum) { mMinimum = newMinimum; };
         uint getMinimum() { return mMinimum; };
-      
+
         virtual void decode(Buffer &buffer, const uint size);
         virtual void encode(Buffer &buffer);
         virtual std::string asString();
@@ -320,7 +320,7 @@ class RDataSOA: public RData {
         // A 32 bit time interval before the zone should be refreshed.
         uint mRefresh;
         // A 32 bit time interval that should elapse before a
-        // failed refresh should be retried. 
+        // failed refresh should be retried.
         uint mRetry;
         // A 32 bit time value that specifies the upper limit on
         // the time interval that can elapse before the zone is no
@@ -338,7 +338,7 @@ class RDataSOA: public RData {
  * depends on the domain where it is found.
  */
 class RDataTXT: public RData {
-    public:    
+    public:
         RDataTXT() { };
         virtual ~RDataTXT() { };
         virtual eRDataType getType() { return RDATA_TXT; };
@@ -350,7 +350,7 @@ class RDataTXT: public RData {
         //virtual std::string getTxt() { return mTxt; };
 
     private:
-        // One or more <character-string>s. 
+        // One or more <character-string>s.
         std::vector<std::string> mTexts;
 };
 
@@ -358,7 +358,7 @@ class RDataTXT: public RData {
  * A Record Representation (IPv4 address)
  */
 class RDataA: public RData {
-    public:    
+    public:
         RDataA() { for (uint i = 0; i < 4; i++) mAddr[i] = 0; };
         virtual ~RDataA()  { };
 
@@ -380,7 +380,7 @@ class RDataA: public RData {
  * WKS Record Representation
  */
 class RDataWKS: public RData {
-    public:    
+    public:
         RDataWKS() : mProtocol(0), mBitmap(NULL), mBitmapSize(0) { for (uint i = 0; i < 4; i++) mAddr[i] = 0; };
         virtual ~RDataWKS();
         virtual eRDataType getType() { return RDATA_WKS; };
@@ -392,7 +392,7 @@ class RDataWKS: public RData {
         uint getProtocol() { return mProtocol; };
 
         uint getBitmapSize() { return mBitmapSize; }
-      
+
         virtual void decode(Buffer &buffer, const uint size);
         virtual void encode(Buffer &buffer);
         virtual std::string asString();
@@ -406,14 +406,14 @@ class RDataWKS: public RData {
         // multiple of 8 bits long.
         char *mBitmap;
         // Size of bitmap
-        uint mBitmapSize; 
+        uint mBitmapSize;
 };
 
 /**
  * AAAA Record Representation (IPv6 address)
  */
 class RDataAAAA: public RData {
-    public:    
+    public:
         RDataAAAA() { for (uint i = 0; i < 16; i++) mAddr[i] = 0; };
         virtual ~RDataAAAA()  { };
 
@@ -434,7 +434,7 @@ class RDataAAAA: public RData {
 
 // http://www.ietf.org/rfc/rfc2915.txt - NAPTR
 class RDataNAPTR : public RData {
-    public:    
+    public:
         RDataNAPTR() : mOrder(0), mPreference(0), mFlags(""), mServices(""), mRegExp(""), mReplacement("") { };
         virtual ~RDataNAPTR() { };
 
@@ -490,32 +490,32 @@ class RDataNAPTR : public RData {
  *     /                     RDATA                     /
  *     /                                               /
  *     +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
- * 
+ *
  * where:
- * 
+ *
  * NAME            a domain name to which this resource record pertains.
- * 
+ *
  * TYPE            two octets containing one of the RR type codes.  This
  *                 field specifies the meaning of the data in the RDATA
  *                 field.
- * 
+ *
  * CLASS           two octets which specify the class of the data in the
  *                 RDATA field.
- * 
+ *
  * TTL             a 32 bit unsigned integer that specifies the time
  *                 interval (in seconds) that the resource record may be
  *                 cached before it should be discarded.  Zero values are
  *                 interpreted to mean that the RR can only be used for the
  *                 transaction in progress, and should not be cached.
- * 
+ *
  * RDLENGTH        an unsigned 16 bit integer that specifies the length in
  *                 octets of the RDATA field.
- * 
+ *
  * RDATA           a variable length string of octets that describes the
  *                 resource.  The format of this information varies
  *                 according to the TYPE and CLASS of the resource record.
  *                 For example, the if the TYPE is A and the CLASS is IN,
- *                 the RDATA field is a 4 octet ARPA Internet address. 
+ *                 the RDATA field is a 4 octet ARPA Internet address.
  */
 class ResourceRecord
 {
