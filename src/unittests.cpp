@@ -62,12 +62,52 @@ void testBuffer()
     assert (strCheck == "www.google.com");
 }
 
-    // check encoding of domain name
-    char b3[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-    dns::Buffer buff3(b3, sizeof(b3) - 1);
-    buff3.putDnsDomainName("");
-    assert (b3[0] == '\x00');
-    assert (b3[1] == 'x');
+// check encoding of empty domain name
+void testBufferEmptyDomainName()
+{
+    char buffer[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    dns::Buffer dnsBuffer(buffer, sizeof(buffer) - 1);
+    dnsBuffer.putDnsDomainName("");
+    assert (buffer[0] == '\x00');
+    assert (buffer[1] == 'x');
+}
+
+// check encoding of domain name
+void testBufferDomainName()
+{
+    char buffer[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    dns::Buffer dnsBuffer(buffer, sizeof(buffer) - 1);
+    dnsBuffer.putDnsDomainName("abc.com");
+    assert (buffer[0] == '\x03');
+    assert (buffer[1] == 'a');
+    assert (buffer[2] == 'b');
+    assert (buffer[3] == 'c');
+    assert (buffer[4] == '\x03');
+    assert (buffer[5] == 'c');
+    assert (buffer[6] == 'o');
+    assert (buffer[7] == 'm');
+    // check proper termination
+    assert (buffer[8] == '\x00');
+    assert (buffer[9] == 'x');
+}
+
+// check encoding of domain name which ends with '.'
+void testBufferDotEndedDomainName()
+{
+    char buffer[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    dns::Buffer dnsBuffer(buffer, sizeof(buffer) - 1);
+    dnsBuffer.putDnsDomainName("abc.com.");
+    assert (buffer[0] == '\x03');
+    assert (buffer[1] == 'a');
+    assert (buffer[2] == 'b');
+    assert (buffer[3] == 'c');
+    assert (buffer[4] == '\x03');
+    assert (buffer[5] == 'c');
+    assert (buffer[6] == 'o');
+    assert (buffer[7] == 'm');
+    // check proper termination
+    assert (buffer[8] == '\x00');
+    assert (buffer[9] == 'x');
 }
 
 void testBufferCharacterString()
@@ -349,6 +389,15 @@ int main(int argc, char** argv)
 {
     cout << "testBuffer" << endl;
     testBuffer();
+
+    cout << "testBufferEmptyDomainName" << endl;
+    testBufferEmptyDomainName();
+
+    cout << "testBufferDomainName" << endl;
+    testBufferDomainName();
+
+    cout << "testBufferDotEndedDomainName" << endl;
+    testBufferDotEndedDomainName();
 
     cout << "testBufferCharacterString" << endl;
     testBufferCharacterString();

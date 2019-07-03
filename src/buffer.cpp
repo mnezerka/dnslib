@@ -357,9 +357,17 @@ void Buffer::putDnsDomainName(const std::string& value, const bool compressionAl
         {
             if (labelLen > MAX_LABEL_LEN)
                 throw(Exception("Encoding failed because of too long domain label (max length is 63 characters)"));
-            domain[labelLenPos] = labelLen; 
-            domainLabelIndexes[domainLabelIndexesCount++] = labelLenPos; 
-            // finish at the end of the string value 
+            domain[labelLenPos] = labelLen;
+            domainLabelIndexes[domainLabelIndexesCount++] = labelLenPos;
+
+            // ignore dot at the end since we do not want to encode
+            // empty label (which will produce one extra 0x00 byte)
+            if (value[ix] == '.' && ix == value.length() - 1)
+            {
+                break;
+            }
+
+            // finish at the end of the string value
             if (ix == value.length())
             {
                 // terminating zero byte
