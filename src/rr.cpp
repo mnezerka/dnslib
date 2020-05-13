@@ -193,7 +193,7 @@ void RDataNULL::decode(Buffer &buffer, const uint size)
     mData = new char[size];
 
     // copy rdata
-    std::memcpy(mData, data, mDataSize);
+    std::memcpy(mData, data, size);
 
     // set new size
     mDataSize = size;

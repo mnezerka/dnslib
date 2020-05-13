@@ -39,7 +39,11 @@
 #include <sstream>
 #include <cstring>
 #include <iomanip>
+#ifdef _WIN32
+#include <Winsock2.h>
+#else
 #include <netinet/in.h>
+#endif
 
 #include "message.h"
 #include "exception.h"
