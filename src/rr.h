@@ -39,6 +39,7 @@
 
 #include <string>
 #include <vector>
+#include <arpa/inet.h>
 
 #include "dns.h"
 #include "buffer.h"
@@ -365,6 +366,7 @@ class RDataA: public RData {
         virtual eRDataType getType() { return RDATA_A; };
 
         void setAddress(const uchar *addr) { for (uint i = 0; i < 4; i++) mAddr[i] = addr[i]; };
+        void setAddress(const std::string &addr) { inet_pton(AF_INET, addr.c_str(), &mAddr); };
         uchar* getAddress() { return mAddr; };
 
         virtual void decode(Buffer &buffer, const uint size);
