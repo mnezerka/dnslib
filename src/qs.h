@@ -96,13 +96,13 @@ public:
     void setName(const std::string& qName) { mQName = qName; } ;
 
     /* Get name filed of the query */
-    std::string getName() const;
+    std::string getName() const { return mQName; } ;
 
     /* Get the type of the query */
-    uint getType() const;
+    uint getType() const { return mQType; };
 
     /* Get the class of the query */
-    eQClass getClass() const;
+    eQClass getClass() const { return mQClass; } ;
 
     void encode(Buffer &buffer);
 
