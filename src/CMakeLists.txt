@@ -6,6 +6,15 @@ project (DNSLIB)
 set(CMAKE_CXX_FLAGS "-Wall -O2")
 #set(CMAKE_CXX_FLAGS "-Wall -g")
 
-add_executable (unittests buffer.cpp message.cpp rr.cpp qs.cpp unittests.cpp)
-add_executable (fakesrv buffer.cpp message.cpp rr.cpp qs.cpp fakesrv.cpp)
-add_executable (fakecli buffer.cpp message.cpp rr.cpp qs.cpp fakecli.cpp)
+set(SOURCES buffer.cpp message.cpp rr.cpp qs.cpp)
+
+add_library (dnslib ${SOURCES})
+
+add_executable (unittests unittests.cpp)
+target_link_libraries (unittests dnslib)
+
+add_executable (fakesrv fakesrv.cpp)
+target_link_libraries (fakesrv dnslib)
+
+add_executable (fakecli fakecli.cpp)
+target_link_libraries (fakecli dnslib)
