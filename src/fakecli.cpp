@@ -46,8 +46,6 @@ using namespace std;
 
 #define MAX_MSG 2000
 
-const int listenPort = 6667;
-
 int main(int argc, char** argv)
 {
     int sockfd = 0;
