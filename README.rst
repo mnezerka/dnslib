@@ -1,8 +1,7 @@
 DNS Protocol Library
 ====================
 
-.. image:: https://travis-ci.com/mnezerka/dnslib.svg?branch=master
-    :target: https://travis-ci.com/mnezerka/dnslib
+.. image:: https://github.com/mnezerka/dnslib/actions/workflows/cmake.yml/badge.svg
 
 Simple C++ library designed for encoding and decoding of DNS protocol packets. It doesn't provide
 any functionality related to network (listening for packets, sending packets, etc.). Library is strictly

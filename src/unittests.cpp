@@ -338,7 +338,7 @@ void testPacket()
 
     std::vector<dns::ResourceRecord*> answers = m1.getAnswers();
     std::string expected[] = {"<<CNAME domainName=www.l.google.com\n", "<<RData A addr=66.249.91.104\n", "<<RData A addr=66.249.91.99\n", "<<RData A addr=66.249.91.103\n", "<<RData A addr=66.249.91.147\n"};
-    for (int i = 0; i < answers.size(); i++) {
+    for (long unsigned int i = 0; i < answers.size(); i++) {
         assert(answers[i]->asString() == expected[i]);
     }
 
@@ -369,7 +369,7 @@ void testPacketInvalid()
         cout << m1.asString() << endl;
         throw ("Failed");
     }
-    catch (dns::Exception e) { /* ok */ };
+    catch (dns::Exception const&) { /* ok */ };
 
     char packet2[] = "\x00\x00\x01\x00\x00\x01\x00\x00\x00\x01\x00\x01\x02\x31\x31\x01\x31\x02\x31\x30\x02\x31\x30\x07\x69\x6e\x2d\x61\x64\x64\x72\x04\x61\x72\x70\x61\x00\x00\x0c\x00\x01\x03\x64\x6e\x73\x05\x73\x75\x69\x74\x65\x05\x6c\x6f\x63\x61\x6c\x00\x00\x0e\x00\x01\x00\x00\x0e\x10\x00\x30\x1c\x31\x27\x29\x29\x29\x20\x41\x4e\x44\x20\x28\x28\x28\x27\x66\x6f\x6f\x27\x20\x4c\x49\x4b\x45\x20\x27\x66\x6f\x6f\xc0\x12\x03\x64\x6e\x73\x05\x73\x75\x69\x74\x65\x05\x6c\x6f\x63\x61\x6c\x00\x00\x00\x29\x20\x00\x00\x00\x80\x00\x00\x00";
     try
@@ -379,7 +379,7 @@ void testPacketInvalid()
         cout << m2.asString() << endl;
         throw ("Failed");
     }
-    catch (dns::Exception e) { /* ok */ };
+    catch (dns::Exception const&) { /* ok */ };
 }
 
 void testCreatePacket()
@@ -410,7 +410,7 @@ void testCreatePacket()
     // todo check buffer
 }
 
-int main(int argc, char** argv)
+int main()
 {
     cout << "testBuffer" << endl;
     testBuffer();

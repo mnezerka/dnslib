@@ -18,3 +18,5 @@ target_link_libraries (fakesrv dnslib)
 
 add_executable (fakecli fakecli.cpp)
 target_link_libraries (fakecli dnslib)
+
+target_compile_options(unittests PRIVATE -Werror -Wall -Wextra)
