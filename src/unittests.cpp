@@ -291,6 +291,20 @@ void testNAPTR()
     assert (r.getReplacement() == "_sip._tcp.icscf.brn56.iit.ims");
 }
 
+void testSRV()
+{
+    dns::RDataSRV r;
+    char dasrv[] = "\x00\x14\x00\x00\x14\x95\x04\x61\x6c\x74\x32\x0b\x78\x6d\x70\x70\x2d\x73\x65\x72\x76\x65\x72\x01\x6c\x06\x67\x6f\x6f\x67\x6c\x65\x03\x63\x6f\x6d\x00";
+
+    assert (r.getType(), dns::RDATA_SRV);
+    dns::Buffer b(dasrv, sizeof(dasrv) - 1);
+    r.decode(b, sizeof(dasrv) - 1);
+    assert (r.getPriority(), 20);
+    assert (r.getWeight(), 0);
+    assert (r.getPort(), 5269);
+    assert (r.getTarget(), "alt2.xmpp-server.l.google.com");
+}
+
 void testPacket()
 {
     // check header without any queries and records

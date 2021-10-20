@@ -468,6 +468,35 @@ class RDataNAPTR : public RData {
         std::string mReplacement;
 };
 
+/**
+ * SRV Record Representation
+ */
+class RDataSRV : public RData {
+    public:
+        RDataSRV() { };
+        virtual ~RDataSRV() { };
+        virtual eRDataType getType() const { return RDATA_SRV; };
+        virtual void decode(Buffer &buffer, const uint size);
+        virtual void encode(Buffer &buffer);
+        virtual std::string asString();
+
+        void setPriority(const uint newPriority) { mPriority = newPriority; };
+        uint getPriority() const { return mPriority; };
+        void setWeight(const uint newWeight) { mWeight = newWeight; };
+        uint getWeight() const { return mWeight; };
+        void setPort(const uint newPort) { mPort = newPort; };
+        uint getPort() const { return mPort; };
+        void setTarget(const std::string newTarget) { mTarget = newTarget; };
+        std::string getTarget() const { return mTarget; };
+
+    private:
+        uint mPriority;
+        uint mWeight;
+        uint mPort;
+        std::string mTarget;
+};
+
+
 /** Represents DNS Resource Record
  *
  * Each resource record has the following format:
