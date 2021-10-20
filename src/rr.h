@@ -475,7 +475,7 @@ class RDataSRV : public RData {
     public:
         RDataSRV() { };
         virtual ~RDataSRV() { };
-        virtual eRDataType getType() const { return RDATA_SRV; };
+        virtual eRDataType getType() { return RDATA_SRV; };
         virtual void decode(Buffer &buffer, const uint size);
         virtual void encode(Buffer &buffer);
         virtual std::string asString();
