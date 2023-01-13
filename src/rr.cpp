@@ -564,7 +564,7 @@ void ResourceRecord::encode(Buffer &buffer)
         uint bufferLastPos = buffer.getPos();
         buffer.setPos(bufferPosRDataLength);
         buffer.put16bits(mRDataSize); // overwritte 0 with actual size of RData
-        buffer.setPos(bufferLastPos);
+        buffer.setSavePos(bufferLastPos);
     }
 }
 
