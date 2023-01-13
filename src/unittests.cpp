@@ -55,6 +55,20 @@ void testBuffer()
     strCheck = b.getDnsCharacterString();
     assert (strCheck == "");
 
+    try {
+        b.setPos(b.getSize());
+    }
+    catch (dns::Exception const&){
+        /* ok */
+    }
+
+    try {
+        b.setSavePos(b.getSize());
+    }
+    catch (dns::Exception const&) {
+        assert(!"Try to set save pos behind buffer");
+    }
+
     // check decoding of domain name
     char b2[] = "\x03\x77\x77\x77\x06\x67\x6f\x6f\x67\x6c\x65\x03\x63\x6f\x6d\x00";
     dns::Buffer buff2(b2, sizeof(b2) - 1);

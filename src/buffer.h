@@ -67,6 +67,9 @@ class Buffer
         // set current position in buffer
         void setPos(const uint pos);
 
+        // set save position in buffer
+        void setSavePos(const uint pos);
+
         // get buffer size in bytes
         uint getSize() { return mBufferSize; }
 
