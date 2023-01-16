@@ -338,8 +338,26 @@ void testPacket()
 
     std::vector<dns::ResourceRecord*> answers = m1.getAnswers();
     std::string expected[] = {"<<CNAME domainName=www.l.google.com\n", "<<RData A addr=66.249.91.104\n", "<<RData A addr=66.249.91.99\n", "<<RData A addr=66.249.91.103\n", "<<RData A addr=66.249.91.147\n"};
+    std::string ip_expected[] = {"None", "66.249.91.104", "66.249.91.99", "66.249.91.103", "66.249.91.147"};
+
     for (long unsigned int i = 0; i < answers.size(); i++) {
         assert(answers[i]->asString() == expected[i]);
+
+        if (answers[i]->getType() == dns::RDATA_A) {
+            assert (answers[i]->getName() == "www.l.google.com");
+            assert (answers[i]->getTtl() == 5);
+            assert (answers[i]->getClass() == dns::CLASS_IN);
+
+            std::string ip;
+            auto addr = ((dns::RDataA*)answers[i]->getRData())->getAddress();
+            auto len = std::snprintf(nullptr, 0, "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
+
+            ip.reserve(len+1);
+            ip.resize(len);
+            std::snprintf((char*)ip.data(), ip.capacity(), "%d.%d.%d.%d", addr[0], addr[1], addr[2], addr[3]);
+
+            assert(ip == ip_expected[i]);
+        }
     }
 
     // check naptr resource records

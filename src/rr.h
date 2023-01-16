@@ -561,19 +561,19 @@ class ResourceRecord
         ~ResourceRecord();
 
         void setName(std::string newName) { mName = newName; };
-        uint getName() const;
+        std::string getName() const { return mName; };
 
         void setType(const eRDataType type) { mType = type; };
-        eRDataType getType() const;
+        eRDataType getType() const { return mType; };
 
         void setClass(eClass newClass) { mClass = newClass; };
-        eClass getClass() const;
+        eClass getClass() const { return mClass; };
 
         void setTtl(uint newTtl) { mTtl = newTtl; };
-        uint getTtl() const;
+        uint getTtl() const { return mTtl; };
 
         void setRData(RData *newRData) { mRData = newRData; mType = newRData->getType(); };
-        //const char* getRData() const;
+        RData* getRData() { return mRData; };
 
         void decode(Buffer &buffer);
         void encode(Buffer &buffer);
