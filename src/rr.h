@@ -39,7 +39,12 @@
 
 #include <string>
 #include <vector>
+
+#ifdef _WIN32
+#include <WS2tcpip.h>
+#else
 #include <arpa/inet.h>
+#endif
 
 #include "dns.h"
 #include "buffer.h"
