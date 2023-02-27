@@ -562,9 +562,9 @@ void ResourceRecord::encode(Buffer &buffer)
         mRData->encode(buffer);
         mRDataSize = buffer.getPos() - bufferPosRDataLength - 2; // 2 because two bytes for RData length are not part of RData block
         uint bufferLastPos = buffer.getPos();
-        buffer.setPos(bufferPosRDataLength);
+        buffer.setPos(bufferPosRDataLength, true);
         buffer.put16bits(mRDataSize); // overwritte 0 with actual size of RData
-        buffer.setPos(bufferLastPos);
+        buffer.setPos(bufferLastPos, true);
     }
 }
 

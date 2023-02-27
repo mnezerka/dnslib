@@ -204,10 +204,10 @@ void Buffer::put32bits(const uint value)
     mBufferPtr++;
 }
 
-void Buffer::setPos(const uint pos)
+void Buffer::setPos(const uint pos, bool saved)
 {
     // check if we are inside buffer
-    if (pos >= mBufferSize)
+    if (pos > mBufferSize || (pos == mBufferSize && !saved))
         throw(Exception("Try to set pos behind buffer"));
     mBufferPtr = mBuffer + pos;
 }
@@ -246,7 +246,7 @@ std::string Buffer::getDnsCharacterString()
 
 void Buffer::putDnsCharacterString(const std::string& value)
 {
-    put8bits(value.length());
+    put8bits((dns::uchar)value.length());
     putBytes(value.c_str(), value.length());
 }
 
@@ -287,7 +287,7 @@ std::string Buffer::getDnsDomainName(const bool compressionAllowed)
             uint saveBuffPos = getPos();
             setPos(linkAddr);
             std::string linkDomain = getDnsDomainName();
-            setPos(saveBuffPos);
+            setPos(saveBuffPos, true);
             if (domain.size() > 0)
                 domain.append(".");
             domain.append(linkDomain);
@@ -411,7 +411,7 @@ void Buffer::putDnsDomainName(const std::string& value, const bool compressionAl
                 // modify buffer length
                 buffLen -= subDomainLen;
                 // go through buffer from beginning and try to find occurence of compression tip
-                for (uint buffPos = 0; buffPos < buffLen ; buffPos++)
+                for (uint buffPos = 0; buffPos < buffLen; buffPos++)
                 {
                     // compare compression tip and content at current position in buffer
                     compressionTipFound = (memcmp(mBuffer + buffPos, subDomain, subDomainLen) == 0);

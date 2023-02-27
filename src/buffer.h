@@ -65,7 +65,8 @@ class Buffer
         uint getPos() { return mBufferPtr - mBuffer; }
 
         // set current position in buffer
-        void setPos(const uint pos);
+        // if you are sure this is a valid savepoint, `saved` can be set to true, which will allow `pos == mBufferSize`.
+        void setPos(const uint pos, bool saved = false);
 
         // get buffer size in bytes
         uint getSize() { return mBufferSize; }
