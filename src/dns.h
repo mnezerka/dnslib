@@ -36,7 +36,7 @@
  */
 
 #ifndef _DNS_DNS_H
-#define	_DNS_DNS_H
+#define _DNS_DNS_H
 
 namespace dns {
 
@@ -46,7 +46,7 @@ typedef unsigned long ulong;
 typedef unsigned char byte;
 
 // maximal length of domain label name
-const uint MAX_MSG_LEN = 512;
+const uint MAX_MSG_LEN = 1514;
 const uint MAX_LABEL_LEN = 63;
 const uint MAX_DOMAIN_LEN = 255;
 
@@ -61,7 +61,6 @@ enum eClass {
     // Hesiod
     CLASS_HS
 };
-
 
 // QCLASS types
 enum eQClass {
@@ -79,7 +78,7 @@ enum eQClass {
 
 // RData types
 enum eRDataType {
-   // a host address
+    // a host address
     RDATA_A = 1,
     // an authoritative name server
     RDATA_NS = 2,
@@ -122,6 +121,5 @@ enum eRDataType {
     RDATA_ANY = 0x00ff
 };
 
-} // namespace
-#endif	/* _DNS_DNS_H */
-
+} // namespace dns
+#endif /* _DNS_DNS_H */
