@@ -46,7 +46,8 @@ typedef unsigned long ulong;
 typedef unsigned char byte;
 
 // maximal length of domain label name
-const uint MAX_MSG_LEN = 1514;
+// packet len - ip_hdr - udp_hdr
+const uint MAX_MSG_LEN = 1514 - 20 - 8;
 const uint MAX_LABEL_LEN = 63;
 const uint MAX_DOMAIN_LEN = 255;
 
